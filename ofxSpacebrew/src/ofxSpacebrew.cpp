@@ -63,11 +63,11 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     Connection::Connection(){
         bConnected = false;
+        client.addListener(this);
     }
     
     //--------------------------------------------------------------
     void Connection::connect( string host, string name, string description){
-        client.addListener(this);
         client.connect( host, 9000 );
         config.name = name;
         config.description = description;
@@ -83,7 +83,8 @@ namespace Spacebrew {
     void Connection::send( string name, string type, string value ){
         if ( bConnected ){
             Message m( name, type, value);
-            client.send( m.getJSON( config.name ) );
+            string msg = m.getJSON( config.name );
+            client.send( msg );
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }
@@ -122,7 +123,8 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
-    void Connection::onConnect( ofxLibwebsockets::Event& args ){}
+    void Connection::onConnect( ofxLibwebsockets::Event& args ){
+    }
     
     //--------------------------------------------------------------
     void Connection::onOpen( ofxLibwebsockets::Event& args ){
