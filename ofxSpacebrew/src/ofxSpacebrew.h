@@ -61,6 +61,8 @@ namespace Spacebrew {
             void connect( string host, Config _config );
         
             void send( string name, string type, string value );
+            void send( Message m );
+            void send( Message * m );
         
             // edit config
             void addSubscribe( string name, string type );

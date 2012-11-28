@@ -83,12 +83,29 @@ namespace Spacebrew {
     void Connection::send( string name, string type, string value ){
         if ( bConnected ){
             Message m( name, type, value);
-            string msg = m.getJSON( config.name );
-            client.send( msg );
+			send(m);
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }
     }
+
+    //--------------------------------------------------------------
+    void Connection::send( Message m ){
+		if ( bConnected ){
+            client.send( m.getJSON( config.name ) );
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+	}
+
+    //--------------------------------------------------------------
+    void Connection::send( Message * m ){
+		if ( bConnected ){
+            client.send( m->getJSON( config.name ) );
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+	}
     
     //--------------------------------------------------------------
     void Connection::addSubscribe( string name, string type ){
@@ -163,7 +180,8 @@ namespace Spacebrew {
                     m.value = args.json["message"]["value"].asString();
                 }
             } else {
-                m.value = args.json["message"]["value"].asString();
+				stringstream s; s<<args.json["message"]["value"];
+				m.value = s.str();
             }
             
             ofNotifyEvent(onMessageEvent, m, this);
