@@ -28,7 +28,7 @@ namespace Spacebrew {
                 _default = value = _val;
             }
             
-            string getJSON( string configName ){
+            virtual string getJSON( string configName ){
                 return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
             }
             
