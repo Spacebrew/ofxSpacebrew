@@ -8,8 +8,10 @@
 
 #pragma once
 
-#define OFX_LWS     // ofxLibwebsockets
-//#define OFX_WSPP    // ofxWebsocketpp
+#if !defined(OFX_WSPP) && !defined(OFX_LWS)
+	//#define OFX_LWS     // ofxLibwebsockets
+	#define OFX_WSPP    // ofxWebsocketpp
+#endif
 
 #ifdef OFX_LWS
     #include "ofxLibwebsockets.h"
