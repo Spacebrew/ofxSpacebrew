@@ -111,7 +111,7 @@ namespace Spacebrew {
                 _client.send( m.getJSON( config.name ) );
             #else
                 if( _client.getClientState() == client::CONNECTED ) {
-                    send( m.getJSON( config.name ) );
+                    sendString( _client.getConnection(), m.getJSON( config.name ) );
                 }
             #endif
         } else {
@@ -354,6 +354,18 @@ namespace Spacebrew {
         }
         
         cout << "pong fail!" << endl;
+    }
+    
+    void Connection::sendString(client::connection_ptr con, const string& str)
+    {
+        con->send(str);
+    }
+    
+    void Connection::sendBinary(client::connection_ptr con, const string& binary)
+    {
+        // unfortunately there's no good way to expose the BINARY enum
+        // through the wrapper class as it's an Enum
+        con->send(binary, websocketpp::frame::opcode::BINARY);
     }
     
 #endif
