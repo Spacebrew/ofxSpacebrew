@@ -8,16 +8,24 @@
 
 #pragma once
 
-#define OFX_LWS // prepping to use with a different ws:// library
+#define OFX_LWS     // ofxLibwebsockets
+//#define OFX_WSPP    // ofxWebsocketpp
 
 #ifdef OFX_LWS
-#include "ofxLibwebsockets.h"
+    #include "ofxLibwebsockets.h"
 #else
+    #include "ofxWebsocketppClient.h"
+    using namespace ofxWebsocketpp::wsClient;
 #endif
 
+
 #include "ofUtils.h"
+#include "json.h"
 
 namespace Spacebrew {
+    
+    static const int SPACEBREW_PORT = 9000;
+    
     
     class Message {
         public:
@@ -72,13 +80,31 @@ namespace Spacebrew {
             void addPublish( Message m );
         
             // websocket methods
+#ifdef OFX_LWS
             void onConnect( ofxLibwebsockets::Event& args );
             void onOpen( ofxLibwebsockets::Event& args );
             void onClose( ofxLibwebsockets::Event& args );
             void onIdle( ofxLibwebsockets::Event& args );
             void onMessage( ofxLibwebsockets::Event& args );
             void onBroadcast( ofxLibwebsockets::Event& args );
+#else
             
+            void sendBinary(ofxWebsocketpp::wsClient::client::connection_ptr con, const string& binary);
+            void sendString(ofxWebsocketpp::wsClient::client::connection_ptr con, const string& str);
+            
+            void onClientSocketMessage(ofxWebsocketpp::wsClient::websocketMessageEvent &event);
+            
+            void onClientSocketPing(ofxWebsocketpp::wsClient::websocketPingEvent &event);
+            void onClientSocketPong(ofxWebsocketpp::wsClient::websocketPingEvent &event);
+            void onClientSocketPongFail(ofxWebsocketpp::wsClient::websocketPingEvent &event);
+            
+            void onClientSocketHandshake(ofxWebsocketpp::wsClient::websocketConnectionEvent &event);
+            void onClientSocketOpen(ofxWebsocketpp::wsClient::websocketConnectionEvent &event);
+            void onClientSocketClose(ofxWebsocketpp::wsClient::websocketConnectionEvent &event);
+            void onClientSocketFail(ofxWebsocketpp::wsClient::websocketConnectionEvent &event);
+        
+#endif
+        
             Config * getConfig();
         
             bool isConnected();
@@ -93,8 +119,13 @@ namespace Spacebrew {
             Config config;
         
     #ifdef OFX_LWS
-            ofxLibwebsockets::Client client;
+        
+            ofxLibwebsockets::Client            _client;
+        
     #else
+            ofxWebsocketpp::wsClient::client    _client;
+            Json::Reader                        _jsonParser;
+        
     #endif
     };
 }

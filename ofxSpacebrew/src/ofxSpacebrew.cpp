@@ -63,20 +63,35 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     Connection::Connection(){
         bConnected = false;
-        client.addListener(this);
+        _client.addListener(this);
     }
     
     //--------------------------------------------------------------
     void Connection::connect( string host, string name, string description){
-        client.connect( host, 9000 );
+
         config.name = name;
         config.description = description;
+
+        #ifdef OFX_LWS
+            _client.connect( host, SPACEBREW_PORT );
+        #else
+            stringstream ss;
+            ss << "ws://" << host << ":" << SPACEBREW_PORT << "/";
+            _client.connect( ss.str() );
+        #endif
     }
     
     //--------------------------------------------------------------
     void Connection::connect( string host, Config _config ){
         config = _config;
-        client.connect( host, 9000 );
+        
+        #ifdef OFX_LWS
+            _client.connect( host, SPACEBREW_PORT );
+        #else
+            stringstream ss;
+            ss << "ws://" << host << ":" << SPACEBREW_PORT << "/";
+            _client.connect( ss.str() );
+        #endif
     }
     
     //--------------------------------------------------------------
@@ -92,7 +107,13 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::send( Message m ){
 		if ( bConnected ){
-            client.send( m.getJSON( config.name ) );
+            #ifdef OFX_LWS
+                _client.send( m.getJSON( config.name ) );
+            #else
+                if( _client.getClientState() == client::CONNECTED ) {
+                    send( m.getJSON( config.name ) );
+                }
+            #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }
@@ -101,7 +122,13 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::send( Message * m ){
 		if ( bConnected ){
-            client.send( m->getJSON( config.name ) );
+            #ifdef OFX_LWS
+                _client.send( m->getJSON( config.name ) );
+            #else
+                if( _client.getClientState() == client::CONNECTED ) {
+                    send( m->getJSON( config.name ) );
+                }
+            #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }
@@ -140,22 +167,17 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
-    void Connection::onConnect( ofxLibwebsockets::Event& args ){
+    Config * Connection::getConfig(){
+        return &config;
     }
     
-    //--------------------------------------------------------------
-    void Connection::onOpen( ofxLibwebsockets::Event& args ){
-        bConnected = true;
-        updatePubSub();
-    }
+    
+#ifdef OFX_LWS
     
     //--------------------------------------------------------------
-    void Connection::onClose( ofxLibwebsockets::Event& args ){
-        bConnected = false;
+    void Connection::updatePubSub(){
+        _client.send(config.getJSON());
     }
-    
-    //--------------------------------------------------------------
-    void Connection::onIdle( ofxLibwebsockets::Event& args ){}
     
     //--------------------------------------------------------------
     void Connection::onMessage( ofxLibwebsockets::Event& args ){
@@ -194,12 +216,147 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
-    Config * Connection::getConfig(){
-        return &config;
+    void Connection::onConnect( ofxLibwebsockets::Event& args ){
     }
     
     //--------------------------------------------------------------
-    void Connection::updatePubSub(){
-        client.send(config.getJSON());
+    void Connection::onOpen( ofxLibwebsockets::Event& args ){
+        bConnected = true;
+        updatePubSub();
     }
+    
+    //--------------------------------------------------------------
+    void Connection::onClose( ofxLibwebsockets::Event& args ){
+        bConnected = false;
+    }
+    
+    //--------------------------------------------------------------
+    void Connection::onIdle( ofxLibwebsockets::Event& args ){
+    }
+
+#else
+        
+    //--------------------------------------------------------------
+    void Connection::updatePubSub(){
+        if( _client.getClientState() == client::CONNECTED ) {
+            send( config.getJSON() );
+        }
+    }
+        
+    void Connection::onClientSocketMessage( websocketMessageEvent &event ) {
+        
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        Json::Value json;
+        
+        if( _jsonParser.parse( event.message->get_payload(), json ) ) {
+            
+            if ( !json.isNull() ){
+                Message m;
+                m.name = json["message"]["name"].asString();
+                m.type = json["message"]["type"].asString();
+                
+                string type = json["message"]["type"].asString();
+                if ( type == "string" && json["message"]["value"].isString()){
+                    m.value = json["message"]["value"].asString();
+                } else if ( type == "boolean" ){
+                    if ( json["message"]["value"].isInt() ){
+                        m.value = ofToString( json["message"]["value"].asInt());
+                    } else if ( json["message"]["value"].isString() ){
+                        m.value = json["message"]["value"].asString();
+                    }
+                } else if ( type == "number" ){
+                    if ( json["message"]["value"].isInt() ){
+                        m.value = ofToString( json["message"]["value"].asInt());
+                    } else if ( json["message"]["value"].isString() ){
+                        m.value = json["message"]["value"].asString();
+                    }
+                } else {
+                    stringstream s; s << json["message"]["value"];
+                    m.value = s.str();
+                }
+                
+                ofNotifyEvent(onMessageEvent, m, this);
+            }
+            
+        }
+    }
+    
+    void Connection::onClientSocketHandshake(websocketConnectionEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        cout << "handshake!" << endl;
+    }
+    
+    void Connection::onClientSocketOpen(websocketConnectionEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        bConnected = true;
+        updatePubSub();
+    }
+    
+    void Connection::onClientSocketClose(websocketConnectionEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        bConnected = false;
+    }
+    
+    void Connection::onClientSocketFail(websocketConnectionEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        bConnected = false;
+    }
+    
+    void Connection::onClientSocketPing(websocketPingEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        cout << "ping!" << endl;
+    }
+    
+    void Connection::onClientSocketPong(websocketPingEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        cout << "pong!" << endl;
+    }
+    
+    void Connection::onClientSocketPongFail(websocketPingEvent &event)
+    {
+        // temporary hack due to global events
+        if(event.connection != _client.getConnection()) {
+            return;
+        }
+        
+        cout << "pong fail!" << endl;
+    }
+    
+#endif
+    
+    
 }
