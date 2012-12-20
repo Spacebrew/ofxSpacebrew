@@ -66,7 +66,10 @@ namespace Spacebrew {
     class Connection {
         public:
             Connection();
+			~Connection();
         
+			void update( ofEventArgs & e );
+
             void connect( string host, string name, string description);
             void connect( string host, Config _config );
         
@@ -110,15 +113,24 @@ namespace Spacebrew {
             Config * getConfig();
         
             bool isConnected();
+			void setAutoReconnect( bool bAutoReconnect=true );
+			void setReconnectRate( int reconnectMillis );
+			bool doesAutoReconnect();
         
             ofEvent<Message> onMessageEvent;
         
         protected:
         
+			string host;
             bool bConnected;
             void updatePubSub();
         
             Config config;
+
+			// reconnect
+			bool bAutoReconnect;
+			int	 lastTimeTriedConnect;
+			int	 reconnectInterval;
         
     #ifdef OFX_LWS
         

@@ -64,11 +64,29 @@ namespace Spacebrew {
     Connection::Connection(){
         bConnected = false;
         _client.addListener(this);
+		ofAddListener( ofEvents().update, this, &Connection::update );
+		reconnectInterval = 2000;
+		bAutoReconnect	  = false;
     }
     
     //--------------------------------------------------------------
-    void Connection::connect( string host, string name, string description){
+	Connection::~Connection(){
+		ofRemoveListener( ofEvents().update, this, &Connection::update );
+	}
+        
+    //--------------------------------------------------------------
+	void Connection::update( ofEventArgs & e ){
+		if ( bAutoReconnect ){
+			if ( !bConnected && ofGetElapsedTimeMillis() - lastTimeTriedConnect > reconnectInterval ){
+				lastTimeTriedConnect = ofGetElapsedTimeMillis();
+				connect( host, config );
+			}
+		}
+	}
 
+    //--------------------------------------------------------------
+    void Connection::connect( string _host, string name, string description){
+		host = _host;
         config.name = name;
         config.description = description;
 
@@ -170,7 +188,21 @@ namespace Spacebrew {
     Config * Connection::getConfig(){
         return &config;
     }
-    
+	
+    //--------------------------------------------------------------
+	void Connection::setAutoReconnect( bool _bAutoReconnect ){
+		bAutoReconnect = _bAutoReconnect;
+	}
+
+    //--------------------------------------------------------------
+	void Connection::setReconnectRate( int reconnectMillis ){
+		reconnectInterval = reconnectMillis;
+	}
+
+    //--------------------------------------------------------------
+	bool Connection::doesAutoReconnect(){
+		return bAutoReconnect;
+	}
     
 #ifdef OFX_LWS
     
@@ -228,11 +260,14 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::onClose( ofxLibwebsockets::Event& args ){
         bConnected = false;
+		lastTimeTriedConnect = ofGetElapsedTimeMillis();
     }
     
     //--------------------------------------------------------------
     void Connection::onIdle( ofxLibwebsockets::Event& args ){
     }
+
+
 
 #else
         
@@ -314,6 +349,7 @@ namespace Spacebrew {
         }
         
         bConnected = false;
+		lastTimeTriedConnect = ofGetElapsedTimeMillis();
     }
     
     void Connection::onClientSocketFail(websocketConnectionEvent &event)
