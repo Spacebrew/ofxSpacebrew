@@ -9,8 +9,8 @@
 #pragma once
 
 #if !defined(OFX_WSPP) && !defined(OFX_LWS)
-	#define OFX_LWS     // ofxLibwebsockets
-	//#define OFX_WSPP    // ofxWebsocketpp
+	//#define OFX_LWS     // ofxLibwebsockets
+	#define OFX_WSPP    // ofxWebsocketpp
 #endif
 
 #ifdef OFX_LWS

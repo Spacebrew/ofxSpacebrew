@@ -274,7 +274,7 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::updatePubSub(){
         if( _client.getClientState() == client::CONNECTED ) {
-            send( config.getJSON() );
+            sendString( _client.getConnection(), config.getJSON() );
         }
     }
         
