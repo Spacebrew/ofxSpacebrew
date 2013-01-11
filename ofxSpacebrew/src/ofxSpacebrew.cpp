@@ -63,20 +63,47 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     Connection::Connection(){
         bConnected = false;
+    #ifdef SPACEBREW_USE_OFX_LWS
         client.addListener(this);
+    #endif
+
+        ofAddListener( ofEvents().update, this, &Connection::update );
+        reconnectInterval = 2000;
+        bAutoReconnect    = false;
     }
-    
+
     //--------------------------------------------------------------
-    void Connection::connect( string host, string name, string description){
-        client.connect( host, 9000 );
+    Connection::~Connection(){
+        ofRemoveListener( ofEvents().update, this, &Connection::update );
+    }
+        
+    //--------------------------------------------------------------
+    void Connection::update( ofEventArgs & e ){
+        if ( bAutoReconnect ){
+            if ( !bConnected && ofGetElapsedTimeMillis() - lastTimeTriedConnect > reconnectInterval ){
+                lastTimeTriedConnect = ofGetElapsedTimeMillis();
+                connect( host, config );
+            }
+        }
+    }
+
+    //--------------------------------------------------------------
+    void Connection::connect( string _host, string name, string description){
+        host = _host;
         config.name = name;
         config.description = description;
+
+    #ifdef SPACEBREW_USE_OFX_LWS
+        client.connect( host, SPACEBREW_PORT );
+    #endif
     }
     
     //--------------------------------------------------------------
     void Connection::connect( string host, Config _config ){
         config = _config;
-        client.connect( host, 9000 );
+    #ifdef SPACEBREW_USE_OFX_LWS
+        client.connect( host, SPACEBREW_PORT );
+    #endif
     }
     
     //--------------------------------------------------------------
@@ -92,7 +119,9 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::send( Message m ){
 		if ( bConnected ){
+        #ifdef SPACEBREW_USE_OFX_LWS
             client.send( m.getJSON( config.name ) );
+        #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }
@@ -101,7 +130,9 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::send( Message * m ){
 		if ( bConnected ){
+        #ifdef SPACEBREW_USE_OFX_LWS
             client.send( m->getJSON( config.name ) );
+        #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }
@@ -138,6 +169,35 @@ namespace Spacebrew {
             updatePubSub();
         }
     }
+
+    //--------------------------------------------------------------
+    Config * Connection::getConfig(){
+        return &config;
+    }
+
+    //--------------------------------------------------------------
+    void Connection::setAutoReconnect( bool _bAutoReconnect ){
+        bAutoReconnect = _bAutoReconnect;
+    }
+
+    //--------------------------------------------------------------
+    void Connection::setReconnectRate( int reconnectMillis ){
+        reconnectInterval = reconnectMillis;
+    }
+
+    //--------------------------------------------------------------
+    bool Connection::doesAutoReconnect(){
+        return bAutoReconnect;
+    }
+
+    //--------------------------------------------------------------
+    void Connection::updatePubSub(){
+#ifdef SPACEBREW_USE_OFX_LWS
+        client.send(config.getJSON());
+#endif
+    }
+
+#ifdef SPACEBREW_USE_OFX_LWS
     
     //--------------------------------------------------------------
     void Connection::onConnect( ofxLibwebsockets::Event& args ){
@@ -152,6 +212,7 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::onClose( ofxLibwebsockets::Event& args ){
         bConnected = false;
+        lastTimeTriedConnect = ofGetElapsedTimeMillis();
     }
     
     //--------------------------------------------------------------
@@ -192,14 +253,6 @@ namespace Spacebrew {
     void Connection::onBroadcast( ofxLibwebsockets::Event& args ){
         
     }
-    
-    //--------------------------------------------------------------
-    Config * Connection::getConfig(){
-        return &config;
-    }
-    
-    //--------------------------------------------------------------
-    void Connection::updatePubSub(){
-        client.send(config.getJSON());
-    }
+
+#endif
 }

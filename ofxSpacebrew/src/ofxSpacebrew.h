@@ -8,16 +8,21 @@
 
 #pragma once
 
-#define OFX_LWS // prepping to use with a different ws:// library
+#define SPACEBREW_USE_OFX_LWS // prepping to use with a different ws:// library
 
-#ifdef OFX_LWS
-#include "ofxLibwebsockets.h"
+#ifdef SPACEBREW_USE_OFX_LWS
+    #include "ofxLibwebsockets.h"
 #else
 #endif
 
 #include "ofUtils.h"
+#ifndef SPACEBREW_USE_OFX_LWS
+    #include "json.h"
+#endif
 
 namespace Spacebrew {
+
+    static const int SPACEBREW_PORT = 9000;
     
     class Message {
         public:
@@ -56,6 +61,9 @@ namespace Spacebrew {
     class Connection {
         public:
             Connection();
+            ~Connection();
+        
+            void update( ofEventArgs & e );
         
             void connect( string host, string name, string description);
             void connect( string host, Config _config );
@@ -68,9 +76,10 @@ namespace Spacebrew {
             void addSubscribe( string name, string type );
             void addSubscribe( Message m );
             
-            void addPublish( string name, string type, string def);
+            void addPublish( string name, string type, string def="");
             void addPublish( Message m );
         
+        #ifdef SPACEBREW_USE_OFX_LWS
             // websocket methods
             void onConnect( ofxLibwebsockets::Event& args );
             void onOpen( ofxLibwebsockets::Event& args );
@@ -78,21 +87,32 @@ namespace Spacebrew {
             void onIdle( ofxLibwebsockets::Event& args );
             void onMessage( ofxLibwebsockets::Event& args );
             void onBroadcast( ofxLibwebsockets::Event& args );
+        #else
+        #endif
             
             Config * getConfig();
         
             bool isConnected();
+            void setAutoReconnect( bool bAutoReconnect=true );
+            void setReconnectRate( int reconnectMillis );
+            bool doesAutoReconnect();
         
             ofEvent<Message> onMessageEvent;
         
         protected:
         
+            string host;
             bool bConnected;
             void updatePubSub();
         
             Config config;
+            
+            // reconnect
+            bool bAutoReconnect;
+            int  lastTimeTriedConnect;
+            int  reconnectInterval;
         
-    #ifdef OFX_LWS
+    #ifdef SPACEBREW_USE_OFX_LWS
             ofxLibwebsockets::Client client;
     #else
     #endif
