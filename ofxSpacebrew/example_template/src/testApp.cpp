@@ -4,7 +4,7 @@ ofColor color;
 
 //--------------------------------------------------------------
 void testApp::setup(){
-    string host = "localhost"; // change to ec2-184-72-140-184.compute-1.amazonaws.com to test Spacebrew Cloud server
+    string host = "ec2-184-72-140-184.compute-1.amazonaws.com"; // change to ec2-184-72-140-184.compute-1.amazonaws.com to test Spacebrew Cloud server
     string name = "of-example";
     string description = "It's amazing";
     spacebrew.addSubscribe("backgroundOn", "boolean");

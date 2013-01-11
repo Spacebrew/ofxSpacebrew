@@ -1,0 +1,435 @@
+<?xml version="1.0"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="example_template" />
+		<Option makefile="makefile" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="addons\;src\;" />
+		<Build>
+			<Target title="release">
+				<Option output="bin\$(PROJECT_NAME)" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option object_output="obj\release" />
+				<Option external_deps="..\..\..\libs\openFrameworksCompiled\lib\win_cb\openFrameworks.lib;" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="../../../libs/openFrameworksCompiled/lib/win_cb/openFrameworks.lib" />
+				</Linker>
+			</Target>
+			<Target title="debug">
+				<Option output="bin\$(PROJECT_NAME)_DEBUG" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option object_output="obj\debug\" />
+				<Option external_deps="..\..\..\libs\openFrameworksCompiled\lib\win_cb\openFrameworksDebug.lib;" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="../../../libs/openFrameworksCompiled/lib/win_cb/openFrameworksDebug.lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wno-multichar" />
+			<Add directory="..\..\..\libs\glu\include" />
+			<Add directory="..\..\..\libs\freetype\include" />
+			<Add directory="..\..\..\libs\freetype\include\freetype2" />
+			<Add directory="..\..\..\libs\FreeImage\include" />
+			<Add directory="..\..\..\libs\quicktime\include" />
+			<Add directory="..\..\..\libs\rtAudio\include" />
+			<Add directory="..\..\..\libs\fmodex\include" />
+			<Add directory="..\..\..\libs\videoInput\include" />
+			<Add directory="..\..\..\libs\glew\include" />
+			<Add directory="..\..\..\libs\glut\include" />
+			<Add directory="..\..\..\libs\openFrameworks" />
+			<Add directory="..\..\..\libs\openFrameworks\3d" />
+			<Add directory="..\..\..\libs\openFrameworks\app" />
+			<Add directory="..\..\..\libs\openFrameworks\communication" />
+			<Add directory="..\..\..\libs\openFrameworks\events" />
+			<Add directory="..\..\..\libs\openFrameworks\gl" />
+			<Add directory="..\..\..\libs\openFrameworks\graphics" />
+			<Add directory="..\..\..\libs\openFrameworks\math" />
+			<Add directory="..\..\..\libs\openFrameworks\sound" />
+			<Add directory="..\..\..\libs\openFrameworks\types" />
+			<Add directory="..\..\..\libs\openFrameworks\utils" />
+			<Add directory="..\..\..\libs\openFrameworks\video" />
+			<Add directory="..\..\..\libs\poco\include" />
+			<Add directory="..\..\..\libs\tess2\include" />
+			<Add directory="..\..\..\libs\cairo\include\cairo" />
+			<Add directory="src" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/jsoncpp" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/jsoncpp/json" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/data" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/include" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/sys" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/lib" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/libwebsockets/lib/win32" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/openssl" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/openssl/lib" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/openssl/lib/win32" />
+			<Add directory="../../../addons/ofxLibwebsockets/libs/openssl/openssl" />
+			<Add directory="../../../addons/ofxLibwebsockets/src" />
+			<Add directory="../../../addons/ofxSpacebrew/libs" />
+			<Add directory="../../../addons/ofxSpacebrew/src" />
+		</Compiler>
+		<Linker>
+			<Add library="..\..\..\libs\FreeImage\lib\win_cb\FreeImage.lib" />
+			<Add library="..\..\..\libs\rtAudio\lib\win_cb\librtaudio.a" />
+			<Add library="..\..\..\libs\quicktime\lib\win_cb\qtmlClient.lib" />
+			<Add library="..\..\..\libs\cairo\lib\win_cb\libcairo.a" />
+			<Add library="..\..\..\libs\cairo\lib\win_cb\libpixman-1.a" />
+			<Add library="..\..\..\libs\freetype\lib\win_cb\libfreetype.a" />
+			<Add library="..\..\..\libs\glut\lib\win_cb\libglut.a" />
+			<Add library="..\..\..\libs\videoInput\lib\win_cb\videoInputLib.a" />
+			<Add library="..\..\..\libs\fmodex\lib\win_cb\libfmodex.a" />
+			<Add library="..\..\..\libs\glew\lib\win_cb\glew32s.lib" />
+			<Add library="..\..\..\libs\glu\lib\win_cb\glu32.lib" />
+			<Add library="..\..\..\libs\poco\lib\win_cb\libPocoNet.a" />
+			<Add library="..\..\..\libs\poco\lib\win_cb\libPocoUtil.a" />
+			<Add library="..\..\..\libs\poco\lib\win_cb\libPocoXML.a" />
+			<Add library="..\..\..\libs\poco\lib\win_cb\libPocoFoundation.a" />
+			<Add library="..\..\..\libs\tess2\lib\win_cb\libtess2.a" />
+			<Add library="opengl32" />
+			<Add library="gdi32" />
+			<Add library="msimg32" />
+			<Add library="glu32" />
+			<Add library="dsound" />
+			<Add library="winmm" />
+			<Add library="dxguid" />
+			<Add library="strmbase" />
+			<Add library="strmiids" />
+			<Add library="z" />
+			<Add library="uuid" />
+			<Add library="ole32" />
+			<Add library="oleaut32" />
+			<Add library="setupapi" />
+			<Add library="wsock32" />
+			<Add library="ws2_32" />
+			<Add library="Iphlpapi" />
+			<Add library="Comdlg32" />
+		</Linker>
+		<ExtraCommands>
+			<Add after="xcopy /e /i /y &quot;$(PROJECT_DIR)..\..\..\export\win_cb\*.dll&quot;  &quot;$(PROJECT_DIR)bin&quot;" />
+			<Add after="cmd /c if not exist &quot;$(PROJECT_DIR)bin/data&quot; mkdir &quot;$(PROJECT_DIR)bin/data&quot;" />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="src\main.cpp">
+			<Option virtualFolder="src" />
+		</Unit>
+		<Unit filename="src\testApp.cpp">
+			<Option virtualFolder="src" />
+		</Unit>
+		<Unit filename="src\testApp.h">
+			<Option virtualFolder="src" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+		<Unit filename="../../../addons/ofxLibwebsockets/src/ofxLibwebsockets.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/jsoncpp/json/json-forwards.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/jsoncpp/json" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/jsoncpp/json/json.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/jsoncpp/json" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/jsoncpp/jsoncpp.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/jsoncpp" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/libwebsockets.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/getopt.c">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/getopt.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/getopt_long.c">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/gettimeofday.c">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/gettimeofday.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/netdb.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/strings.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/sys/time.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/sys" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/unistd.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/websock-w32.c">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers/websock-w32.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/libwebsockets/include/win32port/win32helpers" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Client.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Connection.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Events.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Protocol.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Reactor.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Server.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets/Util.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/include/ofxLibwebsockets" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src/Client.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src/Connection.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src/Events.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src/Protocol.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src/Reactor.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/ofxLibwebsockets/src/Server.cpp">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/ofxLibwebsockets/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/aes.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/asn1.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/asn1_mac.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/asn1t.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/bio.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/blowfish.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/bn.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/buffer.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/cast.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/comp.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/conf.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/conf_api.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/crypto.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/des.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/des_old.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/dh.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/dsa.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/dso.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/e_os2.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ebcdic.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ec.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/engine.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/err.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/evp.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/hmac.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/krb5_asn.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/kssl.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/lhash.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/md2.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/md4.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/md5.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/mdc2.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/obj_mac.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/objects.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ocsp.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/opensslconf.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/opensslv.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ossl_typ.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/pem.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/pem2.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/pkcs12.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/pkcs7.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/rand.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/rc2.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/rc4.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/rc5.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ripemd.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/rsa.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/safestack.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/sha.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ssl.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ssl2.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ssl23.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ssl3.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/stack.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/symhacks.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/tls1.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/tmdiff.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/txt_db.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ui.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/ui_compat.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/x509.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/x509_vfy.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxLibwebsockets/libs/openssl/openssl/x509v3.h">
+			<Option virtualFolder="addons/ofxLibwebsockets/libs/openssl/openssl" />
+		</Unit>
+		<Unit filename="../../../addons/ofxSpacebrew/src/ofxSpacebrew.cpp">
+			<Option virtualFolder="addons/ofxSpacebrew/src" />
+		</Unit>
+		<Unit filename="../../../addons/ofxSpacebrew/src/ofxSpacebrew.h">
+			<Option virtualFolder="addons/ofxSpacebrew/src" />
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
