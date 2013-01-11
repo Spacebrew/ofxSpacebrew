@@ -67,8 +67,8 @@
 			<RandomizedBaseAddress>false</RandomizedBaseAddress>
 			<DataExecutionPrevention />
 			<TargetMachine>MachineX86</TargetMachine>
-			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalDependencies>libwebsocketswin32d.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>..\..\..\addons\ofxLibwebsockets\libs\libwebsockets\lib\win32;..\..\..\addons\ofxLibwebsockets\libs\openssl\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 		</Link>
 		<PostBuildEvent />
 	</ItemDefinitionGroup>
@@ -92,8 +92,8 @@
 			<DataExecutionPrevention />
 			<TargetMachine>MachineX86</TargetMachine>
 			<LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalDependencies>libwebsocketswin32.lib;libeay32.lib;ssleay32.lib;websocketpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>..\..\..\addons\ofxLibwebsockets\libs\libwebsockets\lib\win32;..\..\..\addons\ofxLibwebsockets\libs\openssl\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 		</Link>
 		<PostBuildEvent />
 	</ItemDefinitionGroup>
