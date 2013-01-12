@@ -32,11 +32,11 @@ namespace Spacebrew {
                 type = _type;
                 _default = value = _val;
             }
-            
+                
             virtual string getJSON( string configName ){
                 return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
             }
-            
+        
             string name, type, _default, value;
     };
     
@@ -96,6 +96,8 @@ namespace Spacebrew {
             void setAutoReconnect( bool bAutoReconnect=true );
             void setReconnectRate( int reconnectMillis );
             bool doesAutoReconnect();
+        
+            string getHost();
         
             ofEvent<Message> onMessageEvent;
         

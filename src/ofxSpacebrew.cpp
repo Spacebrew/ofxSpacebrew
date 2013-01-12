@@ -196,6 +196,11 @@ namespace Spacebrew {
         client.send(config.getJSON());
 #endif
     }
+    
+    //--------------------------------------------------------------
+    string Connection::getHost(){
+        return host;
+    }
 
 #ifdef SPACEBREW_USE_OFX_LWS
     
