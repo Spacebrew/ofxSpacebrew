@@ -9,7 +9,23 @@
 #include "ofxSpacebrew.h"
 
 namespace Spacebrew {
-
+    
+#pragma mark Message
+    
+    //--------------------------------------------------------------
+    Message::Message( string _name, string _type, string _val){
+        name = _name;
+        type = _type;
+        _default = value = _val;
+    }
+    
+    //--------------------------------------------------------------
+    string Message::getJSON( string configName ){
+        return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
+    }
+    
+#pragma mark Config
+    
     //--------------------------------------------------------------
     void Config::addSubscribe( string name, string type ){
         subscribe.push_back( Message(name, type) );
@@ -59,6 +75,8 @@ namespace Spacebrew {
         
         return message;
     }
+    
+#pragma mark Connection
     
     //--------------------------------------------------------------
     Connection::Connection(){
@@ -111,6 +129,36 @@ namespace Spacebrew {
         if ( bConnected ){
             Message m( name, type, value);
 			send(m);
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+    }
+
+    //--------------------------------------------------------------
+    void Connection::send( string name, string value ){
+        if ( bConnected ){
+            Message m( name, "string", value);
+            send(m);
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+    }
+
+    //--------------------------------------------------------------
+    void Connection::send( string name, int value ){
+        if ( bConnected ){
+            Message m( name, "range", ofToString(value));
+            send(m);
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+    }
+
+    //--------------------------------------------------------------
+    void Connection::send( string name, bool value ){
+        if ( bConnected ){
+            Message m( name, "boolean", ofToString(value));
+            send(m);
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
         }

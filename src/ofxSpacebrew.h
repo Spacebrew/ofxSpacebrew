@@ -21,34 +21,63 @@
 #endif
 
 namespace Spacebrew {
-
-    static const int SPACEBREW_PORT = 9000;
     
+    // Some useful constants
+    static const int            SPACEBREW_PORT = 9000;
+    static const std::string    SPACEBREW_CLOUD = "sandbox.spacebrew.cc";
+    
+    /**
+     * @brief Spacebrew message
+     * @class Spacebrew::Message
+     */
     class Message {
         public:
-            
-            Message( string _name="", string _type="", string _val=""){
-                name = _name;
-                type = _type;
-                _default = value = _val;
-            }
-                
-            virtual string getJSON( string configName ){
-                return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
-            }
         
-            string name, type, _default, value;
+            /** @constructor */
+            Message( string _name="", string _type="", string _val="");
+            virtual string getJSON( string configName );
+            
+            /**
+             * @brief Name of Message
+             * @type {std::string}
+             */
+            string name;
+
+            /**
+             * @brief Message type ("string", "boolean", "range", or custom type)
+             * @type {std::string}
+             */
+            string type;
+
+            /**
+             * @brief Default value
+             * @type {std::string}
+             */
+            string _default;
+
+            /**
+             * @brief Current value (cast to string)
+             * @type {std::string}
+             */
+            string value;
     };
     
+    /**
+     * @brief Wrapper for Spacebrew config message. Gets created automatically by 
+     * Spacebrew::Connection, but can sometimes be nice to use yourself.
+     * @class Spacebrew::Config
+     */
     class Config {
         public:
             
+            // see documentation below
+            // docs left out here to avoid confusion. Most people will use these methods
+            // on Spacebrew::Connection directly
             void addSubscribe( string name, string type );
             void addSubscribe( Message m );
-        
             void addPublish( string name, string type, string def);
             void addPublish( Message m );
-        
+            
             string getJSON();
             string name, description;
             
@@ -58,26 +87,135 @@ namespace Spacebrew {
             vector<Message> subscribe;
     };
     
+    /**
+     * @brief Main Spacebrew class, connected to Spacebrew server. Sets up socket, builds configs
+     * and publishes ofEvents on incoming messages.
+     * @class Spacebrew::Connection
+     */
     class Connection {
         public:
             Connection();
             ~Connection();
         
-            void update( ofEventArgs & e );
-        
-            void connect( string host, string name, string description);
+            /**
+             * @brief Connect to Spacebrew. Pass empty values to connect to default host as "openFrameworks" app 
+             * (use only for testing!)
+             * @param {std::string} host        Host to connect to (e.g. "localhost", SPACEBREW_CLOUD ). Can be IP address OR hostname
+             * @param {std::string} name        Name of your app (shows up in Spacebrew admin)
+             * @param {std::string} description What does your app do?
+             */
+            void connect( string host = SPACEBREW_CLOUD, string name = "openFrameworks app", string description = "");
             void connect( string host, Config _config );
-        
+            
+            /**
+             * @brief Send a message
+             * @param {std::string} name    Name of message
+             * @param {std::string} type    Message type ("string", "boolean", "range", or custom type)
+             * @param {std::string} value   Value (cast to string)
+             */
             void send( string name, string type, string value );
+
+            /**
+             * @brief Send a string message
+             * @param {std::string} name    Name of message
+             * @param {std::string} value   Value
+             */
+            void send( string name, string value );
+
+            /**
+             * @brief Send a range message
+             * @param {std::string} name    Name of message
+             * @param {int}         value   Value
+             */
+            void send( string name, int value );
+
+            /**
+             * @brief Send a boolean message
+             * @param {std::string} name    Name of message
+             * @param {bool}        value   Value
+             */
+            void send( string name, bool value );
+
+            /**
+             * Send a Spacebrew Message object
+             * @param {Spacebrew::Message} m
+             */
             void send( Message m );
+
+            /**
+             * @brief Send a Spacebrew Message object. Use this method if you've overridden Spacebrew::Message
+             * (especially) if you've created a custom getJson() method!)
+             * @param {Spacebrew::Message} m
+             */
             void send( Message * m );
         
-            // edit config
+            /**
+             * @brief Add a message that you want to subscribe to
+             * @param {std::string} name    Name of message
+             * @param {std::string} type    Message type ("string", "boolean", "range", or custom type)
+             */
             void addSubscribe( string name, string type );
+
+            /**
+             * @brief Add a message that you want to subscribe to
+             * @param {Spacebrew::Message} m
+             */
             void addSubscribe( Message m );
             
+            /**
+             * @brief Add message of specific name + type to publish
+             * @param {std::string} name Name of message
+             * @param {std::string} typ  Message type ("string", "boolean", "range", or custom type)
+             * @param {std::string} def  Default value
+             */
             void addPublish( string name, string type, string def="");
+
+            /**
+             * @brief Add message to publish
+             * @param {Spacebrew::Message} m
+             */
             void addPublish( Message m );
+
+            /**
+             * @brief ofEvent to subscribe to!
+             * @example ofAddListener(spacebrew.onMessageEvent, this, &testApp::onMessage);
+             * void testApp::onMessage( Spacebrew::Message & m ){ 
+             *     cout<< m.value << endl; 
+             * };
+             */
+            ofEvent<Message> onMessageEvent;
+
+            /**
+             * @return Current Spacebrew::Config (list of publish/subscribe, etc)
+             */
+            Config * getConfig();
+        
+            /**
+             * @return Are we connected?
+             */
+            bool isConnected();
+
+            /**
+             * @brief Turn on/off auto reconnect (try to connect when/if Spacebrew server closes)
+             * @param {boolean} bAutoReconnect (true by default)
+             */
+            void setAutoReconnect( bool bAutoReconnect=true );
+
+            /**
+             * @brief How often should we try to reconnect if auto-reconnect is on (defaults to 1 second [1000 millis])
+             * @param {int} reconnectMillis How often to reconnect, in milliseconds
+             */
+            void setReconnectRate( int reconnectMillis );
+
+            /**
+             * @return Are we trying to auto-reconnect?
+             */
+            bool doesAutoReconnect();
+
+            /**
+             * @return Current hostname
+             */
+            string getHost();
         
         #ifdef SPACEBREW_USE_OFX_LWS
             // websocket methods
@@ -89,19 +227,9 @@ namespace Spacebrew {
             void onBroadcast( ofxLibwebsockets::Event& args );
         #else
         #endif
-            
-            Config * getConfig();
-        
-            bool isConnected();
-            void setAutoReconnect( bool bAutoReconnect=true );
-            void setReconnectRate( int reconnectMillis );
-            bool doesAutoReconnect();
-        
-            string getHost();
-        
-            ofEvent<Message> onMessageEvent;
         
         protected:
+            void update( ofEventArgs & e );
         
             string host;
             bool bConnected;
@@ -119,4 +247,12 @@ namespace Spacebrew {
     #else
     #endif
     };
+    
+    /**
+     * @brief Helper function to automatically add a listener to a connections onMessageEvent
+     */
+    template<class T, class SB>
+    void addListener(T * app, SB & connection){
+        ofAddListener( connection.onMessageEvent, app, &T::onMessage);
+    }
 }
