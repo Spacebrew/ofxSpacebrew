@@ -4,13 +4,14 @@ ofColor color;
 
 //--------------------------------------------------------------
 void testApp::setup(){
-    string host = "ec2-184-72-140-184.compute-1.amazonaws.com"; // change to ec2-184-72-140-184.compute-1.amazonaws.com to test Spacebrew Cloud server
+    string host = "sandbox.spacebrew.cc"; // change to localhost to test Spacebrew local server
     string name = "of-example";
     string description = "It's amazing";
     spacebrew.addSubscribe("backgroundOn", "boolean");
     spacebrew.addPublish("of-mouse", "boolean", "false");
     spacebrew.connect( host, name, description );
-    ofAddListener(spacebrew.onMessageEvent, this, &testApp::onMessage);
+    
+    Spacebrew::addListener(this, spacebrew);
 }
 
 //--------------------------------------------------------------
