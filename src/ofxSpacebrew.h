@@ -60,10 +60,17 @@ namespace Spacebrew {
              * @type {std::string}
              */
             string value;
+        
+            friend ostream& operator<<(ostream& os, const Message& vec);
     };
     
+    inline ostream& operator<<(ostream& os, const Message& m) {
+        os << m.name << ", " << m.type << ", " << m.value;
+        return os;
+    }
+    
     /**
-     * @brief Wrapper for Spacebrew config message. Gets created automatically by 
+     * @brief Wrapper for Spacebrew config message. Gets created automatically by
      * Spacebrew::Connection, but can sometimes be nice to use yourself.
      * @class Spacebrew::Config
      */

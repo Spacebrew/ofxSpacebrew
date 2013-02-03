@@ -21,7 +21,11 @@ namespace Spacebrew {
     
     //--------------------------------------------------------------
     string Message::getJSON( string configName ){
-        return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
+        if ( type == "string" ){
+            return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
+        } else {
+            return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":" + value +"}}";
+        }
     }
     
 #pragma mark Config
@@ -221,6 +225,11 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     Config * Connection::getConfig(){
         return &config;
+    }
+    
+    //--------------------------------------------------------------
+    bool Connection::isConnected(){
+        return bConnected;
     }
 
     //--------------------------------------------------------------
