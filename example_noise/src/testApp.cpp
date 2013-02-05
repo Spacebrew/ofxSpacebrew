@@ -17,8 +17,8 @@ void testApp::update(){
     if ( spacebrew.isConnected() ){
         float noiseFast = ofNoise(ofGetElapsedTimeMillis() * .1) * 1024.0f;
         float noiseSlow = ofNoise(ofGetElapsedTimef() * .1) * 1024.0f;
-        spacebrew.send("noiseFast", (int) (noiseFast) );
-        spacebrew.send("noiseSlow", (int) (noiseSlow) );
+        spacebrew.sendRange("noiseFast", (noiseFast) );
+        spacebrew.sendRange("noiseSlow", (noiseSlow) );
     }
 }
 

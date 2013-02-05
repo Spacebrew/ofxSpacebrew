@@ -127,21 +127,21 @@ namespace Spacebrew {
              * @param {std::string} name    Name of message
              * @param {std::string} value   Value
              */
-            void send( string name, string value );
+            void sendString( string name, string value );
 
             /**
              * @brief Send a range message
              * @param {std::string} name    Name of message
              * @param {int}         value   Value
              */
-            void send( string name, int value );
+            void sendRange( string name, int value );
 
             /**
              * @brief Send a boolean message
              * @param {std::string} name    Name of message
              * @param {bool}        value   Value
              */
-            void send( string name, bool value );
+            void sendBoolean( string name, bool value );
 
             /**
              * Send a Spacebrew Message object

@@ -21,7 +21,7 @@ namespace Spacebrew {
     
     //--------------------------------------------------------------
     string Message::getJSON( string configName ){
-        if ( type == "string" ){
+        if ( type == "string" || type == "boolean" ){
             return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value +"\"}}";
         } else {
             return "{\"message\":{\"clientName\":\"" + configName +"\",\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":" + value +"}}";
@@ -139,7 +139,7 @@ namespace Spacebrew {
     }
 
     //--------------------------------------------------------------
-    void Connection::send( string name, string value ){
+    void Connection::sendString( string name, string value ){
         if ( bConnected ){
             Message m( name, "string", value);
             send(m);
@@ -149,7 +149,7 @@ namespace Spacebrew {
     }
 
     //--------------------------------------------------------------
-    void Connection::send( string name, int value ){
+    void Connection::sendRange( string name, int value ){
         if ( bConnected ){
             Message m( name, "range", ofToString(value));
             send(m);
@@ -159,9 +159,10 @@ namespace Spacebrew {
     }
 
     //--------------------------------------------------------------
-    void Connection::send( string name, bool value ){
+    void Connection::sendBoolean( string name, bool value ){
         if ( bConnected ){
-            Message m( name, "boolean", ofToString(value));
+            string out = value ? "true" : "false";
+            Message m( name, "boolean", out);
             send(m);
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");

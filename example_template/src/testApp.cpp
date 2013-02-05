@@ -50,12 +50,12 @@ void testApp::mouseDragged(int x, int y, int button){}
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
-    spacebrew.send("of-mouse", "boolean", "true");
+    spacebrew.sendBoolean("of-mouse", true);
 }
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
-    spacebrew.send("of-mouse", "boolean", "false");
+    spacebrew.sendBoolean("of-mouse", false);
 }
 
 //--------------------------------------------------------------

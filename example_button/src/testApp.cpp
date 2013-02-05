@@ -41,14 +41,14 @@ void testApp::draw(){
 void testApp::mousePressed(int x, int y, int button){
     if ( checkInsideCircle( ofPoint(x,y), ofPoint(ofGetWidth() / 2.0f, ofGetHeight()/2.0f), radius) ){
         bButtonPressed = true;
-        spacebrew.send("button", true);
+        spacebrew.sendBoolean("button", true);
     }
 }
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
     if (bButtonPressed){
-        spacebrew.send("button", false);
+        spacebrew.sendBoolean("button", false);
     }
     bButtonPressed = false;
 }
