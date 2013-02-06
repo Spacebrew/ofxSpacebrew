@@ -57,4 +57,6 @@ ADDING TO PROJECTS
 			* click the arrow at the right of "Additional include directories" and select "edit"
 			* add the ofxSpacebrew source files:
 			
-			```..\..\..\addons\ofxSpacebrew\src```
+			```
+			..\..\..\addons\ofxSpacebrew\src
+```
