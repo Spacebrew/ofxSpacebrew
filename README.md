@@ -13,14 +13,15 @@ Setup
 ADDING TO PROJECTS
 ------------
 * OS X
-  * Via OF Project Generator:
+	* Via OF Project Generator:
 		1. Delete ofxLibwebsockets/libs/libwebsockets/include/win32port
 		2. Add ofxLibwebsockets to your addons via the projectGenerator
-    3. Add ofxSpacebrew to your addons via the projectGenerator
+		3. Add ofxSpacebrew to your addons via the projectGenerator
 		4. That's it!
+
 	* Adding to a new/existing project:
-  	1. Delete ofxLibwebsockets/libs/libwebsockets/include/win32port
-    2. Add ofxSpacebrew and ofxLibwebsockets code to your project
+		1. Delete ofxLibwebsockets/libs/libwebsockets/include/win32port
+  		2. Add ofxSpacebrew and ofxLibwebsockets code to your project
 		3. Include ofxLibwebsockets' xcconfig file via your project's Project.xcconfig file:
 			1. Define where it lives: 
 			```OFX_LWS_PATH = "$(OF_PATH)/addons/ofxLibwebsockets"```
