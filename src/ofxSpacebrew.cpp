@@ -28,6 +28,24 @@ namespace Spacebrew {
         }
     }
     
+    //--------------------------------------------------------------
+    bool Message::valueBoolean(){
+        if ( type != "boolean" ) ofLogWarning("This Message is not a boolean type! You'll most likely get 'false'");
+        return value == "true";
+    }
+    
+    //--------------------------------------------------------------
+    int Message::valueRange(){
+        if ( type != "range" ) ofLogWarning("This Message is not a range type! Results may be unpredictable");
+        return ofClamp(ofToInt(value), 0, 1023);
+    }
+    
+    //--------------------------------------------------------------
+    string Message::valueString(){
+        if ( type != "string" ) ofLogWarning("This Message is not a string type! Returning raw value as string.");
+        return value;
+    }
+    
 #pragma mark Config
     
     //--------------------------------------------------------------

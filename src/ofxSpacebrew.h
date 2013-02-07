@@ -23,8 +23,11 @@
 namespace Spacebrew {
     
     // Some useful constants
-    static const int            SPACEBREW_PORT = 9000;
+    static const int            SPACEBREW_PORT  = 9000;
     static const std::string    SPACEBREW_CLOUD = "sandbox.spacebrew.cc";
+    static const std::string    TYPE_STRING     = "string";
+    static const std::string    TYPE_RANGE      = "range";
+    static const std::string    TYPE_BOOLEAN    = "boolean";
     
     /**
      * @brief Spacebrew message
@@ -60,6 +63,21 @@ namespace Spacebrew {
              * @type {std::string}
              */
             string value;
+        
+            /**
+             * @brief Get your incoming value as a boolean
+             */
+            bool    valueBoolean();
+        
+            /**
+             * @brief Get your incoming value as a range (0-1023)
+             */
+            int     valueRange();
+        
+            /**
+             * @brief Get your incoming value as a string
+             */
+            string    valueString();
         
             friend ostream& operator<<(ostream& os, const Message& vec);
     };
