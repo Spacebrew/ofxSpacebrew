@@ -17,9 +17,13 @@ class testApp : public ofBaseApp{
         // create your spacebrew object
         Spacebrew::Connection spacebrew;
     
+        // listen to spacebrew Messages
+        void onMessage( Spacebrew::Message & m );
+    
         // button stuff
         int  radius;
         bool bButtonPressed;
+        bool bBackgroundOn;
     
         // useful quick test
         bool checkInsideCircle( ofPoint point, ofPoint position, int radius );

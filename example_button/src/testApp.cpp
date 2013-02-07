@@ -2,22 +2,30 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
+    ofSetFrameRate(60);
     string host = Spacebrew::SPACEBREW_CLOUD; // "localhost";
     string name = "of-button-example";
     string description = "It's amazing";
     
-    spacebrew.addPublish("button", "boolean", "false");
+    spacebrew.addPublish("button", Spacebrew::TYPE_BOOLEAN);
+    spacebrew.addSubscribe("backgroundOn", Spacebrew::TYPE_BOOLEAN); //"boolean" ); // just typing "boolean" also works
     spacebrew.connect( host, name, description );
+    
+    // listen to spacebrew events
+    Spacebrew::addListener(this, spacebrew);
     
     // circle stuff
     bButtonPressed  = false;
     radius          = 200;
     
+    // background
+    bBackgroundOn   = false;
+    
     // layout stuff
     ofBackground(0);
     ofSetRectMode(OF_RECTMODE_CENTER);
     ofEnableSmoothing();
-    ofSetCircleResolution(30);
+    ofSetCircleResolution(100);
 }
 
 //--------------------------------------------------------------
@@ -25,6 +33,12 @@ void testApp::update(){}
 
 //--------------------------------------------------------------
 void testApp::draw(){
+    if ( !bBackgroundOn ){
+        ofBackgroundGradient(ofColor(0,0,0), ofColor(50,50,50));
+    } else {
+        ofBackgroundGradient(ofColor(100,0,0), ofColor(150,150,0));
+    }
+    
     string textToDraw = "PRESS ME";
     if ( bButtonPressed ){
         ofSetColor( 150, 0, 0 );
@@ -35,6 +49,13 @@ void testApp::draw(){
     ofCircle(ofGetWidth() / 2.0f, ofGetHeight()/2.0f, radius);
     ofSetColor(255);
     ofDrawBitmapString(textToDraw, ofGetWidth() / 2.0f - 30, ofGetHeight()/2.0f);
+}
+
+//--------------------------------------------------------------
+void testApp::onMessage( Spacebrew::Message & m ){
+    if ( m.name == "backgroundOn" ){
+        bBackgroundOn = m.valueBoolean();
+    }
 }
 
 //--------------------------------------------------------------
