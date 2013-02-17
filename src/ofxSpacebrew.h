@@ -275,9 +275,24 @@ namespace Spacebrew {
     
     /**
      * @brief Helper function to automatically add a listener to a connections onMessageEvent
+     * @example 
+     * Spacebrew::connection;
+     * void onMessage( Message & e ){};
+     *
+     * void setup(){
+     *      Spacebrew::addListener( this, connection);
+     * }
      */
     template<class T, class SB>
     void addListener(T * app, SB & connection){
         ofAddListener( connection.onMessageEvent, app, &T::onMessage);
+    }
+        
+    /**
+     * @brief Helper function to remove onMessage listener
+     */
+    template<class T, class SB>
+    void removeListener(T * app, SB & connection){
+        ofRemoveListener( connection.onMessageEvent, app, &T::onMessage);
     }
 }

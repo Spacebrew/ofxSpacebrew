@@ -114,9 +114,15 @@ namespace Spacebrew {
 
     //--------------------------------------------------------------
     Connection::~Connection(){
+        bConnected = false;
+        bAutoReconnect = false;
         ofRemoveListener( ofEvents().update, this, &Connection::update );
-    }
         
+#ifdef SPACEBREW_USE_OFX_LWS
+        client.close();
+#endif
+    }
+    
     //--------------------------------------------------------------
     void Connection::update( ofEventArgs & e ){
         if ( bAutoReconnect ){
@@ -326,7 +332,7 @@ namespace Spacebrew {
 				m.value = s.str();
             }
             
-            ofNotifyEvent(onMessageEvent, m, this);
+            if ( bConnected ) ofNotifyEvent(onMessageEvent, m, this);
         }
     }
     
