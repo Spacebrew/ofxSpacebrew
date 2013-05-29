@@ -102,10 +102,23 @@ namespace Spacebrew {
             void addSubscribe( Message m );
             void addPublish( string name, string type, string def);
             void addPublish( Message m );
-            
+        
+            vector<Message> & getPublish();
+            vector<Message> & getSubscribe();
+        
+            // remove all current publishers/subscribers (useful when updating)
+            void resetPubSub();
+        
             string getJSON();
             string name, description;
-            
+        
+            //only used in configs from Admin Connection
+            string clientName, remoteAddress;
+        
+            // note: only use this with Admin configs!
+            // it only checks name/address
+            bool operator == ( Config & comp );
+        
         private:
             
             vector<Message> publish;
@@ -244,12 +257,12 @@ namespace Spacebrew {
         
         #ifdef SPACEBREW_USE_OFX_LWS
             // websocket methods
-            void onConnect( ofxLibwebsockets::Event& args );
-            void onOpen( ofxLibwebsockets::Event& args );
-            void onClose( ofxLibwebsockets::Event& args );
-            void onIdle( ofxLibwebsockets::Event& args );
-            void onMessage( ofxLibwebsockets::Event& args );
-            void onBroadcast( ofxLibwebsockets::Event& args );
+            virtual void onConnect( ofxLibwebsockets::Event& args );
+            virtual void onOpen( ofxLibwebsockets::Event& args );
+            virtual void onClose( ofxLibwebsockets::Event& args );
+            virtual void onIdle( ofxLibwebsockets::Event& args );
+            virtual void onMessage( ofxLibwebsockets::Event& args );
+            virtual void onBroadcast( ofxLibwebsockets::Event& args );
         #else
         #endif
         
@@ -294,5 +307,117 @@ namespace Spacebrew {
     template<class T, class SB>
     void removeListener(T * app, SB & connection){
         ofRemoveListener( connection.onMessageEvent, app, &T::onMessage);
+    }
+
+    /**
+     * @brief Simple struct that holds each end of a route.
+     */
+    struct RouteEndpoint {
+        string clientName;
+        string name;
+        string type;
+        string remoteAddress;
+    };
+        
+    /**
+     * @class
+     */
+    class Route {
+    public:
+        
+        Route(){};
+        Route( RouteEndpoint pub, RouteEndpoint sub );
+        
+        void updatePublisher( RouteEndpoint pub );
+        void updateSubscriber( RouteEndpoint pub );
+        
+        RouteEndpoint getPublisher();
+        RouteEndpoint getSubscriber();
+        
+        inline bool operator == ( Route & r);
+        
+    private:
+        RouteEndpoint publisher, subscriber;
+    };
+
+    /**
+     * @brief Extends Message class, adding clientName and remoteAddress
+     * @class Spacebrew::DataMessage
+     */
+    class DataMessage : public Message {
+    public:
+        string clientName;
+        string remoteAddress;
+    };
+
+    /**
+     * @brief Spacebrew Admin Connection: receives messages on new clients added,
+     * clients removed, and routes added/removed
+     * @extends Spacebrew::Connection
+     * @class Spacebrew::AdminConnection
+     */
+    class AdminConnection : public Connection {
+    public:
+#ifdef SPACEBREW_USE_OFX_LWS
+        // websocket methods
+        virtual void onOpen( ofxLibwebsockets::Event& args );
+        virtual void onMessage( ofxLibwebsockets::Event& args );
+#else
+#endif
+        
+        ofEvent<Config>     onClientConnectEvent;
+        ofEvent<Config>     onClientUpdatedEvent;
+        ofEvent<Config>     onClientDisconnectEvent;
+        
+        ofEvent<Route>      onRouteAdded;
+        ofEvent<Route>      onRouteRemoved;
+        
+        ofEvent<DataMessage> onDataPublished;
+        
+    protected:
+        vector<Config>      connectedClients;
+        vector<Route>       currentRoutes;
+        
+        void processIncomingJson( Json::Value & val );
+    };
+        
+    /**
+     * @brief Helper function to automatically add a listener to a admin connections events
+     * Note: you must call the normal Spacebrew::addListener function to listen to normal messages
+     * @example
+     * Spacebrew::connection;
+     *
+     * void onClientConnect( Spacebrew::Config & e ){};
+     * void onClientUpdated( Spacebrew::Config & e ){};
+     * void onClientDisconnect( Spacebrew::Config & e ){};
+     * void onRouteAdded( Spacebrew::Route & e ){};
+     * void onRouteRemoved( Spacebrew::Route & e ){};
+     * void onDataPublished( Spacebrew::DataMessage & e ){};
+     *
+     * void setup(){
+     *      Spacebrew::addAdminListener( this, connection);
+     * }
+     */
+    template<class T, class SB>
+    void addAdminListener(T * app, SB & connection){
+        ofAddListener( connection.onClientConnectEvent, app, &T::onClientConnect);
+        ofAddListener( connection.onClientUpdatedEvent, app, &T::onClientUpdated);
+        ofAddListener( connection.onClientDisconnectEvent, app, &T::onClientDisconnect);
+        ofAddListener( connection.onRouteAdded, app, &T::onRouteAdded);
+        ofAddListener( connection.onRouteRemoved, app, &T::onRouteRemoved);
+        ofAddListener( connection.onDataPublished, app, &T::onDataPublished);
+    }
+    
+    /**
+     * @brief Helper function to remove onMessage listener
+     */
+    template<class T, class SB>
+    void removeAdminListener(T * app, SB & connection){
+        ofRemoveListener( connection.onClientConnectEvent, app, &T::onClientConnect);
+        ofRemoveListener( connection.onClientUpdatedEvent, app, &T::onClientUpdated);
+        ofRemoveListener( connection.onClientDisconnectEvent, app, &T::onClientDisconnect);
+        ofRemoveListener( connection.onRouteAdded, app, &T::onRouteAdded);
+        ofRemoveListener( connection.onRouteRemoved, app, &T::onRouteRemoved);
+        ofRemoveListener( connection.onDataPublished, app, &T::onDataPublished);
     }
 }

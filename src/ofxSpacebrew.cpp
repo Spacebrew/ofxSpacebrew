@@ -69,6 +69,22 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
+    vector<Message> & Config::getPublish(){
+        return publish;
+    }
+    
+    //--------------------------------------------------------------
+    vector<Message> & Config::getSubscribe(){
+        return subscribe;
+    }
+    
+    //--------------------------------------------------------------
+    void Config::resetPubSub(){
+        publish.clear();
+        subscribe.clear();
+    }
+    
+    //--------------------------------------------------------------
     string Config::getJSON(){
         string message = "{\"config\": {\"name\": \"" + name +"\",\"description\":\"" + description +"\",\"publish\": {\"messages\": [";
         
@@ -96,6 +112,13 @@ namespace Spacebrew {
         message += "]}}}";
         
         return message;
+    }
+    
+    //--------------------------------------------------------------
+    bool Config::operator == ( Config & comp ){
+        if ( clientName == comp.clientName && remoteAddress == comp.remoteAddress ){
+            return true;
+        }
     }
     
 #pragma mark Connection
@@ -342,4 +365,187 @@ namespace Spacebrew {
     }
 
 #endif
+
+#pragma mark Route
+    //--------------------------------------------------------------
+    Route::Route( RouteEndpoint pub, RouteEndpoint sub ){
+        updatePublisher( pub );
+        updateSubscriber( sub );
+    }
+    
+    //--------------------------------------------------------------
+    void Route::updatePublisher( RouteEndpoint pub ){
+        publisher = pub;
+    }
+    
+    //--------------------------------------------------------------
+    void Route::updateSubscriber( RouteEndpoint sub ){
+        subscriber = sub;
+    }
+    
+    //--------------------------------------------------------------
+    RouteEndpoint Route::getPublisher(){
+        return publisher;
+    }
+    
+    //--------------------------------------------------------------
+    RouteEndpoint Route::getSubscriber(){
+        return  subscriber;
+    }
+    
+    //--------------------------------------------------------------
+    bool Route::operator == ( Route & r){
+        RouteEndpoint pub = r.getPublisher();
+        RouteEndpoint sub = r.getSubscriber();
+        
+        bool bSamePub = pub.clientName == publisher.clientName &&
+                        pub.name == publisher.name &&
+                        pub.type == publisher.type &&
+                        pub.remoteAddress == publisher.remoteAddress;
+    
+        bool bSameSub = sub.clientName == subscriber.clientName &&
+                        sub.name == subscriber.name &&
+                        sub.type == subscriber.type &&
+                        sub.remoteAddress == subscriber.remoteAddress;
+        
+        return bSamePub && bSameSub;
+    }
+    
+#pragma mark AdminConnection
+    
+#ifdef SPACEBREW_USE_OFX_LWS
+
+    //--------------------------------------------------------------
+    void AdminConnection::onOpen( ofxLibwebsockets::Event& args ){
+        Connection::onOpen(args);
+        
+        // send admin "register" message
+        client.send("{\"admin\":[{\"admin\": true,\"no_msgs\": true}]}");
+    }
+
+    //--------------------------------------------------------------
+    void AdminConnection::onMessage( ofxLibwebsockets::Event& args ){
+        if ( !args.json.isNull() ){
+            
+            // start configs come in as array
+            if ( args.json.isArray() ){
+                for (int k=0; k<args.json.size(); k++){
+                    
+                    Json::Value config = args.json[k];
+                    
+                    processIncomingJson( config );
+                }
+            // normal ws event
+            } else if ( !args.json["message"].isNull() && args.json["message"]["clientName"].isNull()){
+                Connection::onMessage(args);
+            
+            // 
+            } else {
+                processIncomingJson( args.json );
+            }
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void AdminConnection::processIncomingJson( Json::Value & config ){
+        // new connection
+        if ( !config["config"].isNull() ){
+            Config c;
+            c.name          = config["config"]["name"].asString();
+            c.description   = config["config"]["description"].asString();
+            c.remoteAddress = config["config"]["remoteAddress"].asString();
+            
+            Json::Value publishes = config["config"]["publish"]["messages"];
+            for ( int i=0; i<publishes.size(); i++){
+                c.addPublish(publishes[i]["name"].asString(), publishes[i]["type"].asString(), publishes[i]["default"].asString());
+            }
+            
+            Json::Value subscribes = config["config"]["subscribe"]["messages"];
+            for ( int i=0; i<subscribes.size(); i++){
+                c.addSubscribe(subscribes[i]["name"].asString(), subscribes[i]["type"].asString());
+            }
+            
+            bool bNew = true;
+            
+            // does this client exist yet?
+            for (int j=0; j<connectedClients.size(); j++){
+                if ( connectedClients[j] == c)
+                {
+                    connectedClients[j] = c;
+                    ofNotifyEvent(onClientUpdatedEvent, connectedClients[j], this);
+                    bNew = false;
+                    break;
+                }
+            }
+            
+            if ( bNew ){
+                // doesn't exist yet, add as new
+                connectedClients.push_back( c );
+                ofNotifyEvent(onClientConnectEvent, c, this);
+            }
+            
+            // connection removed
+        } else if ( !config["remove"].isNull()){
+            
+            for (int i=0; i < config["remove"].size(); i++){
+                
+                Json::Value toRemove = config["remove"][i];
+                string name          = toRemove["name"].asString();
+                string remoteAddress = toRemove["remoteAddress"].asString();
+                
+                for (int j=0; j<connectedClients.size(); j++){
+                    if ( connectedClients[j].name == name &&
+                        connectedClients[j].remoteAddress == remoteAddress)
+                    {
+                        ofNotifyEvent(onClientDisconnectEvent, connectedClients[j], this);
+                        connectedClients.erase(connectedClients.begin() + j );
+                        break;
+                    }
+                }
+            }
+            // route
+        } else if ( !config["route"].isNull()){
+            
+            RouteEndpoint pub;
+            pub.name            = config["route"]["publisher"]["name"].asString();
+            pub.type            = config["route"]["publisher"]["type"].asString();
+            pub.clientName      = config["route"]["publisher"]["clientName"].asString();
+            pub.remoteAddress   = config["route"]["publisher"]["remoteAddress"].asString();
+            
+            RouteEndpoint sub;
+            sub.name            = config["route"]["subscriber"]["name"].asString();
+            sub.type            = config["route"]["subscriber"]["type"].asString();
+            pub.clientName      = config["route"]["subscriber"]["clientName"].asString();
+            sub.remoteAddress   = config["route"]["subscriber"]["remoteAddress"].asString();
+            
+            Route r( pub, sub );
+            
+            if ( config["route"]["type"].asString() == "add" ){
+                currentRoutes.push_back(r);
+                ofNotifyEvent(onRouteAdded, r, this);
+            } else if ( config["route"]["type"].asString() == "remove"){
+                for (int i=0; i<currentRoutes.size(); i++){
+                    if ( currentRoutes[i] == r ){
+                        ofNotifyEvent(onRouteRemoved, r, this);
+                        break;
+                    }
+                }
+            }
+            
+            // data
+        } else if ( !config["message"].isNull()){
+            
+            // message from admin
+            if ( !config["message"]["clientName"].isNull()){
+                DataMessage m;
+                m.clientName    = config["message"]["clientName"].asString();
+                m.remoteAddress = config["message"]["remoteAddress"].asString();
+                m.name          = config["message"]["name"].asString();
+                m.type          = config["message"]["type"].asString();
+                m.value         = config["message"]["value"].asString();
+            }
+        }
+    }
+#endif
+    
 }
