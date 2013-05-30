@@ -110,10 +110,10 @@ namespace Spacebrew {
             void resetPubSub();
         
             string getJSON();
-            string name, description;
+            string clientName, description;
         
             //only used in configs from Admin Connection
-            string clientName, remoteAddress;
+            string remoteAddress;
         
             // note: only use this with Admin configs!
             // it only checks name/address
@@ -312,12 +312,36 @@ namespace Spacebrew {
     /**
      * @brief Simple struct that holds each end of a route.
      */
-    struct RouteEndpoint {
+    class RouteEndpoint {
+    public:
         string clientName;
         string name;
         string type;
         string remoteAddress;
+        
+        bool operator == (RouteEndpoint & comp ){
+            return comp.clientName == clientName && comp.name == name && comp.type == type && comp.remoteAddress == remoteAddress;
+        }
     };
+    
+    enum RouteUpdateType {
+        ADD_ROUTE,
+        REMOVE_ROUTE
+    };
+        
+    /**
+     * @brief Util to translate from RouteUpdateType to its corresponding string in the Spacebrew API
+     */
+    static string getRouteUpdateTypeString( RouteUpdateType type ){
+        switch( type){
+            case ADD_ROUTE:
+                return "add";
+                break;
+            case REMOVE_ROUTE:
+                return "remove";
+                break;
+        }
+    }
         
     /**
      * @class
@@ -364,6 +388,70 @@ namespace Spacebrew {
         virtual void onMessage( ofxLibwebsockets::Event& args );
 #else
 #endif
+        // add routes
+        /**
+         * Method that is used to add a route to the Spacebrew server
+         * @param {String} pub_client               Publish client app name
+         * @param {String} pub_address              Publish app remote IP address
+         * @param {String} pub_name    				Publish name
+         * @param {String} sub_client  				Subscribe client app name
+         * @param {String} sub_address 				Subscribe app remote IP address
+         * @param {String} sub_name    				Subscribe name
+         * 
+         * @memberOf Spacebrew::AdminConnection
+         */
+        bool addRoute( string pub_client, string pub_address, string pub_name,
+                       string sub_client, string sub_address, string sub_name );
+        
+        /**
+         * Method that is used to add a route to the Spacebrew server
+         * @param {RouteEndpoint} pub_endpoint       Publisher endpoint
+         * @param {RouteEndpoint} sub_endpoint       Subscriber endpoint
+         *
+         * @memberOf Spacebrew::AdminConnection
+         */
+        bool addRoute( RouteEndpoint pub_endpoint, RouteEndpoint sub_endpoint );
+        
+        /**
+         * Method that is used to add a route to the Spacebrew server
+         * @param {Route} route
+         *
+         * @memberOf Spacebrew::AdminConnection
+         */
+        bool addRoute( Route route );
+        
+        /**
+         * Method that is used to remove a route from the Spacebrew server
+         * @param {String} pub_client               Publish client app name
+         * @param {String} pub_address              Publish app remote IP address
+         * @param {String} pub_name    				Publish name
+         * @param {String} sub_client  				Subscribe client app name
+         * @param {String} sub_address 				Subscribe app remote IP address
+         * @param {String} sub_name    				Subscribe name
+         * 
+         * @memberOf Spacebrew::AdminConnection
+         */
+        bool removeRoute( string pub_client, string pub_address, string pub_name,
+                          string sub_client, string sub_address, string sub_name );
+        
+        /**
+         * Method that is used to remove a route from the Spacebrew server
+         * @param {RouteEndpoint} pub_endpoint       Publisher endpoint
+         * @param {RouteEndpoint} sub_endpoint       Subscriber endpoint
+         *
+         * @memberOf Spacebrew::AdminConnection
+         */
+        bool removeRoute( RouteEndpoint pub_endpoint, RouteEndpoint sub_endpoint );
+        
+        /**
+         * Method that is used to remove a route from the Spacebrew server
+         * @param {Route} route                       
+         *
+         * @memberOf Spacebrew::AdminConnection
+         */
+        bool removeRoute( Route route );
+        
+        // events
         
         ofEvent<Config>     onClientConnectEvent;
         ofEvent<Config>     onClientUpdatedEvent;
@@ -377,6 +465,12 @@ namespace Spacebrew {
     protected:
         vector<Config>      connectedClients;
         vector<Route>       currentRoutes;
+                
+        /**
+         * Method that handles both add and remove route requests. Responsible for parsing requests
+         * and communicating with Spacebrew server
+         */
+        void updateRoute( RouteUpdateType type, Route route );
         
         void processIncomingJson( Json::Value & val );
     };

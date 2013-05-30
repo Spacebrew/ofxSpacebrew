@@ -86,7 +86,7 @@ namespace Spacebrew {
     
     //--------------------------------------------------------------
     string Config::getJSON(){
-        string message = "{\"config\": {\"name\": \"" + name +"\",\"description\":\"" + description +"\",\"publish\": {\"messages\": [";
+        string message = "{\"config\": {\"name\": \"" + clientName +"\",\"description\":\"" + description +"\",\"publish\": {\"messages\": [";
         
         for (int i=0, len=publish.size(); i<len; i++){
             message += "{\"name\":\"" + publish[i].name + "\",";
@@ -159,7 +159,7 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::connect( string _host, string name, string description){
         host = _host;
-        config.name = name;
+        config.clientName = name;
         config.description = description;
 
     #ifdef SPACEBREW_USE_OFX_LWS
@@ -220,7 +220,7 @@ namespace Spacebrew {
     void Connection::send( Message m ){
 		if ( bConnected ){
         #ifdef SPACEBREW_USE_OFX_LWS
-            client.send( m.getJSON( config.name ) );
+            client.send( m.getJSON( config.clientName ) );
         #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
@@ -231,7 +231,7 @@ namespace Spacebrew {
     void Connection::send( Message * m ){
 		if ( bConnected ){
         #ifdef SPACEBREW_USE_OFX_LWS
-            client.send( m->getJSON( config.name ) );
+            client.send( m->getJSON( config.clientName ) );
         #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
@@ -447,11 +447,238 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
+    bool AdminConnection::addRoute( string pub_client, string pub_address, string pub_name,
+                  string sub_client, string sub_address, string sub_name )
+    {
+        //find in routes list
+        RouteEndpoint pub;
+        pub.clientName = pub_client;
+        pub.remoteAddress = pub_address;
+        pub.name = pub_name;
+        
+        RouteEndpoint sub;
+        sub.clientName = sub_client;
+        sub.remoteAddress = sub_address;
+        sub.name = sub_name;
+        
+        bool bValidPublisher = false;
+        bool bValidSubscriber = false;
+        
+        for (int i=0; i<connectedClients.size(); i++){
+            if ( connectedClients[i].clientName == pub_client &&
+                 connectedClients[i].remoteAddress == pub_address ){
+                
+                // make sure it's a real publisher
+                for ( int j=0; j<connectedClients[i].getPublish().size(); j++){
+                    if ( connectedClients[i].getPublish()[j].name == pub_name ){
+                        pub.type = connectedClients[i].getPublish()[j].type;
+                        bValidPublisher = true;
+                        break;
+                    }
+                }
+            } else if ( connectedClients[i].clientName == sub_client &&
+                       connectedClients[i].remoteAddress == sub_address ){
+            
+                // make sure it's a real subscriber
+                for ( int j=0; j<connectedClients[i].getSubscribe().size(); j++){
+                    if ( connectedClients[i].getSubscribe()[j].name == pub_name ){
+                        sub.type = connectedClients[i].getSubscribe()[j].type;
+                        bValidSubscriber = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if ( !bValidPublisher || !bValidSubscriber ){
+            ofLogWarning()<<( !bValidPublisher ? "Invalid publisher!\n" : "")<<(!bValidSubscriber ? "Invalid subscriber!" : "");
+            return false;
+        } else {
+            updateRoute(ADD_ROUTE, Route( pub, sub ));
+            return true;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    bool AdminConnection::addRoute( RouteEndpoint pub_endpoint, RouteEndpoint sub_endpoint )
+    {
+        bool bValidPublisher = false;
+        bool bValidSubscriber = false;
+        
+        //find in routes list
+        for (int i=0; i<connectedClients.size(); i++){
+            if ( connectedClients[i].clientName == pub_endpoint.clientName &&
+                connectedClients[i].remoteAddress == pub_endpoint.remoteAddress ){
+                
+                cout << "found name/address "<<endl;
+                
+                // make sure it's a real publisher
+                for ( int j=0; j<connectedClients[i].getPublish().size(); j++){
+                    if ( connectedClients[i].getPublish()[j].name == pub_endpoint.name ){
+                        bValidPublisher = true;
+                        break;
+                    }
+                }
+            } else if ( connectedClients[i].clientName == sub_endpoint.clientName &&
+                       connectedClients[i].remoteAddress == sub_endpoint.remoteAddress ){
+            
+                // make sure it's a real subscriber
+                for ( int j=0; j<connectedClients[i].getSubscribe().size(); j++){
+                    if ( connectedClients[i].getSubscribe()[j].name == sub_endpoint.name ){
+                        bValidSubscriber = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if ( !bValidPublisher || !bValidSubscriber ){
+            ofLogWarning()<<( !bValidPublisher ? "Invalid publisher! " : "")<<(!bValidSubscriber ? "Invalid subscriber!" : "");
+            return false;
+        } else {
+            updateRoute(ADD_ROUTE, Route( pub_endpoint, sub_endpoint ));
+            return true;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    bool AdminConnection::addRoute( Route route ){
+        bool bValidRoute = false;
+        
+        //find in routes list
+        for (int i=0; i<currentRoutes.size(); i++){
+            if ( currentRoutes[i] == route ){
+                bValidRoute = true;
+            }
+        }
+        if ( !bValidRoute ){
+            ofLogWarning()<<"Invalid route!";
+            return false;
+        } else {
+            updateRoute(ADD_ROUTE, route );
+            return true;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    bool AdminConnection::removeRoute( string pub_client, string pub_address, string pub_name,
+                     string sub_client, string sub_address, string sub_name )
+    {
+        //find in routes list
+        RouteEndpoint pub;
+        RouteEndpoint sub;
+        
+        bool bValidPublisher = false;
+        bool bValidSubscriber = false;
+        
+        for (int i=0; i<currentRoutes.size(); i++){
+            if ( currentRoutes[i].getPublisher().clientName == pub_client &&
+                currentRoutes[i].getPublisher().name == pub_name &&
+                currentRoutes[i].getPublisher().remoteAddress == pub_address ){
+                pub = currentRoutes[i].getPublisher();
+                bValidPublisher = true;
+            }
+            if ( currentRoutes[i].getSubscriber().clientName == sub_client &&
+                currentRoutes[i].getSubscriber().name == sub_name &&
+                currentRoutes[i].getSubscriber().remoteAddress == sub_address ){
+                sub = currentRoutes[i].getSubscriber();
+                bValidSubscriber = true;
+            }
+        }
+        if ( !bValidPublisher || !bValidSubscriber ){
+            ofLogWarning()<<( !bValidPublisher ? "Invalid publisher! " : "")<<(!bValidSubscriber ? "Invalid subscriber!" : "");
+            return false;
+        } else {
+            updateRoute(REMOVE_ROUTE, Route( pub, sub ));
+            return true;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    bool AdminConnection::removeRoute( RouteEndpoint pub_endpoint, RouteEndpoint sub_endpoint ){
+        bool bValidPublisher = false;
+        bool bValidSubscriber = false;
+        
+        //find in routes list
+        for (int i=0; i<currentRoutes.size(); i++){
+            if ( currentRoutes[i].getPublisher() == pub_endpoint ){
+                bValidPublisher = true;
+            }
+            if ( currentRoutes[i].getSubscriber() == sub_endpoint ){
+                bValidSubscriber = true;
+            }
+        }
+        if ( !bValidPublisher || !bValidSubscriber ){
+            ofLogWarning()<<( !bValidPublisher ? "Invalid publisher!\n" : "")<<(!bValidSubscriber ? "Invalid subscriber!" : "");
+            return false;
+        } else {
+            updateRoute(REMOVE_ROUTE, Route( pub_endpoint, sub_endpoint ));
+            return true;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    bool AdminConnection::removeRoute( Route route ){
+        bool bValidRoute = false;
+        
+        //find in routes list
+        for (int i=0; i<currentRoutes.size(); i++){
+            if ( currentRoutes[i] == route ){
+                bValidRoute = true;
+            }
+        }
+        if ( !bValidRoute ){
+            ofLogWarning()<<"Invalid route!";
+            return false;
+        } else {
+            updateRoute(REMOVE_ROUTE, route );
+            return true;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void AdminConnection::updateRoute( RouteUpdateType type, Route route ){
+        Json::Value message;
+        message["route"] = Json::Value( Json::objectValue );
+        message["route"]["publisher"]   = Json::Value( Json::objectValue );
+        message["route"]["subscriber"]  = Json::Value( Json::objectValue );
+        
+        // the JS library checks to see if stuff exists before sending...
+        // not doing that for now.
+        switch (type) {
+            case ADD_ROUTE:
+                break;
+            case REMOVE_ROUTE:
+                break;
+        }
+        
+        message["route"]["type"] = Json::Value(getRouteUpdateTypeString(type));
+        
+        // append pub + sub
+        message["route"]["publisher"]["name"]           = route.getPublisher().name;
+        message["route"]["publisher"]["type"]           = route.getPublisher().type;
+        message["route"]["publisher"]["clientName"]     = route.getPublisher().clientName;
+        message["route"]["publisher"]["remoteAddress"]  = route.getPublisher().remoteAddress;
+        
+        message["route"]["subscriber"]["name"]          = route.getSubscriber().name;
+        message["route"]["subscriber"]["type"]          = route.getSubscriber().type;
+        message["route"]["subscriber"]["clientName"]    = route.getSubscriber().clientName;
+        message["route"]["subscriber"]["remoteAddress"] = route.getSubscriber().remoteAddress;
+        
+        // send to server
+        if ( bConnected ){
+        #ifdef SPACEBREW_USE_OFX_LWS
+            client.send( message.toStyledString() );
+        #endif
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+    }
+    
+    //--------------------------------------------------------------
     void AdminConnection::processIncomingJson( Json::Value & config ){
         // new connection
         if ( !config["config"].isNull() ){
             Config c;
-            c.name          = config["config"]["name"].asString();
+            c.clientName    = config["config"]["name"].asString();
             c.description   = config["config"]["description"].asString();
             c.remoteAddress = config["config"]["remoteAddress"].asString();
             
@@ -478,6 +705,12 @@ namespace Spacebrew {
                 }
             }
             
+            // is this client us?
+            // needs to be a better way to test this... basically just using this to add remoteAddress...
+            if ( c.getJSON() == getConfig()->getJSON() ){
+                getConfig()->remoteAddress = c.remoteAddress;
+            }
+            
             if ( bNew ){
                 // doesn't exist yet, add as new
                 connectedClients.push_back( c );
@@ -494,7 +727,7 @@ namespace Spacebrew {
                 string remoteAddress = toRemove["remoteAddress"].asString();
                 
                 for (int j=0; j<connectedClients.size(); j++){
-                    if ( connectedClients[j].name == name &&
+                    if ( connectedClients[j].clientName == name &&
                         connectedClients[j].remoteAddress == remoteAddress)
                     {
                         ofNotifyEvent(onClientDisconnectEvent, connectedClients[j], this);
