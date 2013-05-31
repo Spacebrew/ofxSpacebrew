@@ -119,6 +119,7 @@ namespace Spacebrew {
         if ( clientName == comp.clientName && remoteAddress == comp.remoteAddress ){
             return true;
         }
+        return false;
     }
     
 #pragma mark Connection
@@ -508,9 +509,6 @@ namespace Spacebrew {
         for (int i=0; i<connectedClients.size(); i++){
             if ( connectedClients[i].clientName == pub_endpoint.clientName &&
                 connectedClients[i].remoteAddress == pub_endpoint.remoteAddress ){
-                
-                cout << "found name/address "<<endl;
-                
                 // make sure it's a real publisher
                 for ( int j=0; j<connectedClients[i].getPublish().size(); j++){
                     if ( connectedClients[i].getPublish()[j].name == pub_endpoint.name ){
@@ -748,7 +746,7 @@ namespace Spacebrew {
             RouteEndpoint sub;
             sub.name            = config["route"]["subscriber"]["name"].asString();
             sub.type            = config["route"]["subscriber"]["type"].asString();
-            pub.clientName      = config["route"]["subscriber"]["clientName"].asString();
+            sub.clientName      = config["route"]["subscriber"]["clientName"].asString();
             sub.remoteAddress   = config["route"]["subscriber"]["remoteAddress"].asString();
             
             Route r( pub, sub );
@@ -760,6 +758,7 @@ namespace Spacebrew {
                 for (int i=0; i<currentRoutes.size(); i++){
                     if ( currentRoutes[i] == r ){
                         ofNotifyEvent(onRouteRemoved, r, this);
+                        currentRoutes.erase(currentRoutes.begin() + i );
                         break;
                     }
                 }
@@ -781,4 +780,13 @@ namespace Spacebrew {
     }
 #endif
     
+    //--------------------------------------------------------------
+    vector<Config> AdminConnection::getConnectedClients(){
+        return connectedClients;
+    }
+    
+    //--------------------------------------------------------------
+    vector<Route> AdminConnection::getCurrentRoutes(){
+        return currentRoutes;
+    }
 }

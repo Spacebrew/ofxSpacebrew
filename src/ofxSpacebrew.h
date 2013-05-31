@@ -319,7 +319,7 @@ namespace Spacebrew {
         string type;
         string remoteAddress;
         
-        bool operator == (RouteEndpoint & comp ){
+        bool operator == (RouteEndpoint comp ){
             return comp.clientName == clientName && comp.name == name && comp.type == type && comp.remoteAddress == remoteAddress;
         }
     };
@@ -461,6 +461,10 @@ namespace Spacebrew {
         ofEvent<Route>      onRouteRemoved;
         
         ofEvent<DataMessage> onDataPublished;
+        
+        // getters
+        vector<Config>      getConnectedClients();
+        vector<Route>       getCurrentRoutes();
         
     protected:
         vector<Config>      connectedClients;
