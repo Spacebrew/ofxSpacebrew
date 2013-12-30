@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 
-#import "ofxSpacebrew.h"
+#include "ofxSpacebrew.h"
 
 class testApp : public ofBaseApp{
 
