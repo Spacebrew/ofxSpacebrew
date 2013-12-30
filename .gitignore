@@ -16,9 +16,13 @@ build/*
 *.xcworkspace
 xcuserdata
 DerivedData
-*.app 
-*/bin/*.dll 
-*.exe 
+*.app
+*/bin/*.dll
+*/bin/*.lib
+*/bin/*.pdb
+*.exe
+*.exp
+*.ilk
 
 # svn & cvs
 .svn
