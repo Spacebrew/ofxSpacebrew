@@ -16,7 +16,9 @@ build/*
 *.xcworkspace
 xcuserdata
 DerivedData
-*.app */bin/*.dll *.exe 
+*.app 
+*/bin/*.dll 
+*.exe 
 
 # svn & cvs
 .svn
