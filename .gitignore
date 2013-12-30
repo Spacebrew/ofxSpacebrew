@@ -17,9 +17,12 @@ build/*
 xcuserdata
 DerivedData
 *.app
+
+# Windows
 */bin/*.dll
 */bin/*.lib
 */bin/*.pdb
+*/obj
 *.exe
 *.exp
 *.ilk
