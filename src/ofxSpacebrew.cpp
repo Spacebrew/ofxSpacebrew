@@ -12,11 +12,55 @@ namespace Spacebrew {
     
 #pragma mark Message
     
+    
     //--------------------------------------------------------------
-    Message::Message( string _name, string _type, string _val){
-        name = _name;
-        type = _type;
-        _default = value = _val;
+    Message::Message( string _name, string _type, string _val) :
+    name(_type),
+    type(_type),
+    _default(_val),
+    value(_val)
+    {
+        bUseReference = false;
+    }
+    
+    //--------------------------------------------------------------
+    Message::Message( string _name, string _type, string * _val ) :
+    name(_name),
+    type(_type),
+    _default(*_val),
+    valuePtr(_val)
+    {
+        bUseReference = true;
+    }
+    
+    //--------------------------------------------------------------
+    Message::Message( string _name, string _type, int * _val ) :
+    name(_name),
+    type(_type),
+    _default(ofToString(*_val)),
+    valuePtr(_val)
+    {
+        bUseReference = true;
+    }
+    
+    //--------------------------------------------------------------
+    Message::Message( string _name, string _type, bool * _val ) :
+    name(_name),
+    type(_type),
+    _default(ofToString(*_val)),
+    valuePtr(_val)
+    {
+        bUseReference = true;
+    }
+    
+    //--------------------------------------------------------------
+    Message::Message( string _name, string _type, void * _val ) :
+    name(_name),
+    type(_type),
+    valuePtr(_val)
+    {
+        bUseReference = true;
+        _default = "";
     }
     
     //--------------------------------------------------------------
@@ -31,19 +75,56 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     bool Message::valueBoolean(){
         if ( type != "boolean" ) ofLogWarning("This Message is not a boolean type! You'll most likely get 'false'");
-        return value == "true";
+        if ( bUseReference ){
+            return  *((bool*)valuePtr);
+        } else {
+            return value == "true";
+        }
     }
     
     //--------------------------------------------------------------
     int Message::valueRange(){
         if ( type != "range" ) ofLogWarning("This Message is not a range type! Results may be unpredictable");
-        return ofClamp(ofToInt(value), 0, 1023);
+        if ( bUseReference ){
+            return  *((int*)valuePtr);
+        } else {
+            if ( ofToInt(value) > 1023 || ofToInt(value) < 0 ) ofLogWarning()<<"Value is outside of Range: 0-1023";
+            return ofClamp(ofToInt(value), 0, 1023);
+        }
     }
     
     //--------------------------------------------------------------
     string Message::valueString(){
         if ( type != "string" ) ofLogWarning("This Message is not a string type! Returning raw value as string.");
-        return value;
+        if ( bUseReference ){
+            return  *((string*)valuePtr);
+        } else {
+            return value;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void Message::update( string val ){
+        // update pointer's value if necessary
+        if (bUseReference){
+            if ( type == TYPE_STRING ){
+                *(string*)valuePtr = val;
+            } else if ( type == TYPE_RANGE ){
+                *(int*)valuePtr = ofToInt(val);
+            } else if ( type == TYPE_BOOLEAN ){
+                *(bool*)valuePtr = ofToBool(val);
+            } else {
+                // arg... this should be a template
+                //*valuePtr = (void) val;
+            }
+        }
+        // update basic value
+        value = val;
+    }
+    
+    //--------------------------------------------------------------
+    bool Message::operator == ( Message & comp ){
+        return (name == comp.name && type == comp.type);
     }
     
 #pragma mark Config
@@ -57,7 +138,20 @@ namespace Spacebrew {
     void Config::addSubscribe( Message m ){
         subscribe.push_back(m);
     }
-
+    //--------------------------------------------------------------
+    void Config::addSubscribe( string name, string type, int * value ){
+        subscribe.push_back( Message(name, type, value) );
+    }
+    
+    //--------------------------------------------------------------
+    void Config::addSubscribe( string name, string type, bool * value ){
+        subscribe.push_back( Message(name, type, value) );
+    }
+    
+    //--------------------------------------------------------------
+    void Config::addSubscribe( string name, string type, void * value ){
+        subscribe.push_back( Message(name, type, value) );
+    }
     //--------------------------------------------------------------
     void Config::addPublish( string name, string type, string def){
         publish.push_back( Message(name, type, def) );
@@ -264,6 +358,30 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
+    void Connection::addSubscribe( string name, string * value ){
+        config.addSubscribe(name, TYPE_STRING, value);
+        if ( bConnected ){
+            updatePubSub();
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void Connection::addSubscribe( string name, bool * value ){
+        config.addSubscribe(name, TYPE_BOOLEAN, value);
+        if ( bConnected ){
+            updatePubSub();
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void Connection::addSubscribe( string name, int * value ){
+        config.addSubscribe(name, TYPE_RANGE, value);
+        if ( bConnected ){
+            updatePubSub();
+        }
+    }
+    
+    //--------------------------------------------------------------
     void Connection::addPublish( Message m ){
         config.addPublish(m);
         if ( bConnected ){
@@ -345,7 +463,7 @@ namespace Spacebrew {
                 } else if ( args.json["message"]["value"].isString() ){
                     m.value = args.json["message"]["value"].asString();
                 }
-            } else if ( type == "number" ){
+            } else if ( type == "number" || type == "range" ){
                 if ( args.json["message"]["value"].isInt() ){
                     m.value = ofToString( args.json["message"]["value"].asInt());
                 } else if ( args.json["message"]["value"].isString() ){
@@ -354,6 +472,14 @@ namespace Spacebrew {
             } else {
 				stringstream s; s<<args.json["message"]["value"];
 				m.value = s.str();
+            }
+            
+            // find message in config and update if necessary
+            vector<Message> sub = config.getSubscribe();
+            for ( int i=0; i<sub.size(); i++){
+                if ( sub[i] == m ){
+                    sub[i].update( m.value );
+                }
             }
             
             if ( bConnected ) ofNotifyEvent(onMessageEvent, m, this);

@@ -38,6 +38,10 @@ namespace Spacebrew {
         
             /** @constructor */
             Message( string _name="", string _type="", string _val="");
+            Message( string _name, string _type, string * _val );
+            Message( string _name, string _type, int * _val );
+            Message( string _name, string _type, bool * _val );
+            Message( string _name, string _type, void * _val );
             virtual string getJSON( string configName );
             
             /**
@@ -79,7 +83,19 @@ namespace Spacebrew {
              */
             string    valueString();
         
+            /**
+             * @brief Update value (updates pointer if using reference)
+             */
+            void update( string value );
+        
+            // only compares name and type
+            bool operator == ( Message & comp );
+        
             friend ostream& operator<<(ostream& os, const Message& vec);
+        
+        protected:
+            void * valuePtr;
+            bool bUseReference;
     };
     
     inline ostream& operator<<(ostream& os, const Message& m) {
@@ -99,6 +115,10 @@ namespace Spacebrew {
             // docs left out here to avoid confusion. Most people will use these methods
             // on Spacebrew::Connection directly
             void addSubscribe( string name, string type );
+            void addSubscribe( string name, string type, string * value );
+            void addSubscribe( string name, string type, int * value );
+            void addSubscribe( string name, string type, bool * value );
+            void addSubscribe( string name, string type, void * value );
             void addSubscribe( Message m );
             void addPublish( string name, string type, string def);
             void addPublish( Message m );
@@ -199,7 +219,30 @@ namespace Spacebrew {
              * @param {Spacebrew::Message} m
              */
             void addSubscribe( Message m );
-            
+        
+            /**
+             * @brief Automatically update a value when you receive a message
+             * @param {std::string}     name    Name of message (assumes a "string" type)
+             * @param {std::string *}   value   Pointer to string to update (will error and ignore call if not "string" type)
+             */
+            void addSubscribe( string name, string * value );
+        
+            /**
+             * @brief Automatically update a value when you receive a message
+             * @param {std::string}     name    Name of message (assumes a "boolean" type)
+             * @param {bool *}          value   Pointer to bool to update (will error and ignore call if not "boolean" type)
+             */
+            void addSubscribe( string name, bool * value );
+        
+            /**
+             * @brief Automatically update a value when you receive a message
+             * @param {std::string}     name    Name of message (assumes a "range" type)
+             * @param {std::string *}   value   Pointer to int to update
+             */
+            void addSubscribe( string name, int * value );
+
+            // No subscribe hook for custom data yet...
+        
             /**
              * @brief Add message of specific name + type to publish
              * @param {std::string} name Name of message
