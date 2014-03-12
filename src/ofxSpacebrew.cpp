@@ -15,7 +15,7 @@ namespace Spacebrew {
     
     //--------------------------------------------------------------
     Message::Message( string _name, string _type, string _val) :
-    name(_type),
+    name(_name),
     type(_type),
     _default(_val),
     value(_val)
