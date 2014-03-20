@@ -306,6 +306,10 @@ namespace Spacebrew {
             virtual void onIdle( ofxLibwebsockets::Event& args );
             virtual void onMessage( ofxLibwebsockets::Event& args );
             virtual void onBroadcast( ofxLibwebsockets::Event& args );
+        
+            ofEvent<ofxLibwebsockets::Event> onOpenEvent;
+            ofEvent<ofxLibwebsockets::Event> onCloseEvent;
+            ofxLibwebsockets::Client & getWebsocket();
         #else
         #endif
         

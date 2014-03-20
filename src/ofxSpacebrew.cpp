@@ -429,6 +429,11 @@ namespace Spacebrew {
 #ifdef SPACEBREW_USE_OFX_LWS
     
     //--------------------------------------------------------------
+    ofxLibwebsockets::Client & Connection::getWebsocket(){
+        return client;
+    }
+    
+    //--------------------------------------------------------------
     void Connection::onConnect( ofxLibwebsockets::Event& args ){
     }
     
@@ -436,12 +441,14 @@ namespace Spacebrew {
     void Connection::onOpen( ofxLibwebsockets::Event& args ){
         bConnected = true;
         updatePubSub();
+        ofNotifyEvent( onOpenEvent, args, this);
     }
     
     //--------------------------------------------------------------
     void Connection::onClose( ofxLibwebsockets::Event& args ){
         bConnected = false;
         lastTimeTriedConnect = ofGetElapsedTimeMillis();
+        ofNotifyEvent( onCloseEvent, args, this);
     }
     
     //--------------------------------------------------------------
@@ -836,6 +843,7 @@ namespace Spacebrew {
             }
             
             if ( bNew ){
+                cout << "New?" << endl;
                 // doesn't exist yet, add as new
                 connectedClients.push_back( c );
                 ofNotifyEvent(onClientConnectEvent, c, this);
