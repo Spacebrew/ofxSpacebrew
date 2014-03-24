@@ -429,6 +429,11 @@ namespace Spacebrew {
 #ifdef SPACEBREW_USE_OFX_LWS
     
     //--------------------------------------------------------------
+    ofxLibwebsockets::Client & Connection::getWebsocket(){
+        return client;
+    }
+    
+    //--------------------------------------------------------------
     void Connection::onConnect( ofxLibwebsockets::Event& args ){
     }
     
@@ -436,12 +441,14 @@ namespace Spacebrew {
     void Connection::onOpen( ofxLibwebsockets::Event& args ){
         bConnected = true;
         updatePubSub();
+        ofNotifyEvent( onOpenEvent, args, this);
     }
     
     //--------------------------------------------------------------
     void Connection::onClose( ofxLibwebsockets::Event& args ){
         bConnected = false;
         lastTimeTriedConnect = ofGetElapsedTimeMillis();
+        ofNotifyEvent( onCloseEvent, args, this);
     }
     
     //--------------------------------------------------------------
@@ -563,10 +570,11 @@ namespace Spacebrew {
                     processIncomingJson( config );
                 }
             // normal ws event
-            } else if ( !args.json["message"].isNull() && args.json["message"]["clientName"].isNull()){
+            } else if ( !args.json["message"].isNull()
+                       && (args.json["message"]["targetType"].isNull() || args.json["message"]["targetType"].asString() == "client")){
                 Connection::onMessage(args);
             
-            // 
+            // admin event
             } else {
                 processIncomingJson( args.json );
             }
@@ -890,7 +898,7 @@ namespace Spacebrew {
                 }
             }
             
-            // data
+        // data
         } else if ( !config["message"].isNull()){
             
             // message from admin
