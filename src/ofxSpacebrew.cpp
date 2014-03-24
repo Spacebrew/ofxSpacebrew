@@ -844,6 +844,7 @@ namespace Spacebrew {
             }
             
             if ( bNew ){
+                cout << "New?" << endl;
                 // doesn't exist yet, add as new
                 connectedClients.push_back( c );
                 ofNotifyEvent(onClientConnectEvent, c, this);
