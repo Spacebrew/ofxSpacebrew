@@ -334,6 +334,27 @@ namespace Spacebrew {
 	}
     
     //--------------------------------------------------------------
+    void Connection::sendBinary( string name, string type, ofBuffer data ){
+        if ( bConnected ){
+            BinaryMessage m( name, type, data);
+            sendBinary(m);
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void Connection::sendBinary( BinaryMessage m ){
+        if ( bConnected ){
+        #ifdef SPACEBREW_USE_OFX_LWS
+            client.sendBinary( m.getSendBuffer( config.clientName ) );
+        #endif
+        } else {
+            ofLog( OF_LOG_WARNING, "Send failed, not connected!");
+        }
+    }
+    
+    //--------------------------------------------------------------
     void Connection::addSubscribe( string name, string type ){
         config.addSubscribe(name, type);
         if ( bConnected ){
@@ -456,40 +477,81 @@ namespace Spacebrew {
     
     //--------------------------------------------------------------
     void Connection::onMessage( ofxLibwebsockets::Event& args ){
-        if ( !args.json.isNull() ){
-            Message m;
-            m.name = args.json["message"]["name"].asString();
-            m.type = args.json["message"]["type"].asString();
-            
-            string type = args.json["message"]["type"].asString();
-            if ( type == "string" && args.json["message"]["value"].isString()){
-                m.value = args.json["message"]["value"].asString();
-            } else if ( type == "boolean" ){
-                if ( args.json["message"]["value"].isInt() ){
-                    m.value = ofToString( args.json["message"]["value"].asInt());
-                } else if ( args.json["message"]["value"].isString() ){
+        if ( !args.isBinary ){
+            if ( !args.json.isNull() ){
+                Message m;
+                m.name = args.json["message"]["name"].asString();
+                m.type = args.json["message"]["type"].asString();
+                
+                string type = args.json["message"]["type"].asString();
+                if ( type == "string" && args.json["message"]["value"].isString()){
                     m.value = args.json["message"]["value"].asString();
+                } else if ( type == "boolean" ){
+                    if ( args.json["message"]["value"].isInt() ){
+                        m.value = ofToString( args.json["message"]["value"].asInt());
+                    } else if ( args.json["message"]["value"].isString() ){
+                        m.value = args.json["message"]["value"].asString();
+                    }
+                } else if ( type == "number" || type == "range" ){
+                    if ( args.json["message"]["value"].isInt() ){
+                        m.value = ofToString( args.json["message"]["value"].asInt());
+                    } else if ( args.json["message"]["value"].isString() ){
+                        m.value = args.json["message"]["value"].asString();
+                    }
+                } else {
+                    stringstream s; s<<args.json["message"]["value"];
+                    m.value = s.str();
                 }
-            } else if ( type == "number" || type == "range" ){
-                if ( args.json["message"]["value"].isInt() ){
-                    m.value = ofToString( args.json["message"]["value"].asInt());
-                } else if ( args.json["message"]["value"].isString() ){
-                    m.value = args.json["message"]["value"].asString();
+                
+                // find message in config and update if necessary
+                vector<Message> sub = config.getSubscribe();
+                for ( int i=0; i<sub.size(); i++){
+                    if ( sub[i] == m ){
+                        sub[i].update( m.value );
+                    }
                 }
+                
+                if ( bConnected ) ofNotifyEvent(onMessageEvent, m, this);
+            }
+        } else {
+            // first, extract the message
+            string temp(args.data.getBinaryBuffer());
+            int mStart = temp.find("{");
+            if ( mStart >= 0 ){
+                int len = ofToInt(temp.substr(0,mStart));
+                string jsonStr = temp.substr(mStart,len);
+                
+                static Json::Reader jsonReader;
+                Json::Value json;
+                jsonReader.parse(jsonStr, json);
+                
+                string name = json["message"]["name"].asString();
+                string type = json["message"]["type"].asString();
+                
+                // value == size of binary data
+                stringstream s; s<<json["message"]["value"];
+                string value = s.str();
+                
+                // find message in config and update if necessary
+//                vector<Message> sub = config.getSubscribe();
+//                for ( int i=0; i<sub.size(); i++){
+//                    if ( sub[i] == m ){
+//                        sub[i].update( m.value );
+//                    }
+//                }
+                
+                int size = ofToInt(value);
+                char * data = (char*) calloc(size, sizeof(char) );
+                memcpy(data, args.data.getBinaryBuffer() + len, size);
+                
+                BinaryMessage m(name, type, data, size);
+                
+                ofLogVerbose() << "[ofxSpacebrew::Connection] got binary of size "<<size;;
+                
+                if ( bConnected ) ofNotifyEvent(onBinaryMessage, m, this);
             } else {
-				stringstream s; s<<args.json["message"]["value"];
-				m.value = s.str();
+                cout <<"WTF"<<endl;
             }
-            
-            // find message in config and update if necessary
-            vector<Message> sub = config.getSubscribe();
-            for ( int i=0; i<sub.size(); i++){
-                if ( sub[i] == m ){
-                    sub[i].update( m.value );
-                }
-            }
-            
-            if ( bConnected ) ofNotifyEvent(onMessageEvent, m, this);
         }
     }
     

@@ -104,6 +104,49 @@ namespace Spacebrew {
     }
     
     /**
+     * @brief Spacebrew binary message
+     * @class Spacebrew::BinaryMessage
+     */
+    class BinaryMessage : public Spacebrew::Message
+    {
+    public:
+        BinaryMessage( string _name, string _type, const ofBuffer buff ) : Message(_name, _type){
+            buffer.clear();
+            buffer.append(buff.getBinaryBuffer(), buff.size());
+        }
+        
+        BinaryMessage( string _name, string _type, const char * data, const long size ) : Message(_name, _type){
+            buffer.clear();
+            buffer.append(data, size);
+        }
+        
+        string getJSON( string configName ){
+            stringstream ss;
+            ss<<"{\"message\":{\"clientName\":\"";
+            ss<<configName<<"\",\"name\":\""<<name + "\",";
+            ss<<"\"type\":\"" + type + "\",";
+            ss<<"\"value\":"<<buffer.size()<<"}}";
+            return ss.str();
+        }
+        
+        ofBuffer getSendBuffer( string configName ){
+            outputBuffer.clear();
+            string json = getJSON(configName);
+            outputBuffer.append( ofToString(json.length()) );
+            outputBuffer.append( json );
+            outputBuffer.append( buffer.getBinaryBuffer(), buffer.size() );
+            return outputBuffer;
+        }
+        
+        ofBuffer & data(){
+            return buffer;
+        }
+        
+    protected:
+        ofBuffer buffer, outputBuffer;
+    };
+    
+    /**
      * @brief Wrapper for Spacebrew config message. Gets created automatically by
      * Spacebrew::Connection, but can sometimes be nice to use yourself.
      * @class Spacebrew::Config
@@ -206,6 +249,9 @@ namespace Spacebrew {
              * @param {Spacebrew::Message} m
              */
             void send( Message * m );
+        
+            void sendBinary( string name, string type, ofBuffer data );
+            void sendBinary( BinaryMessage m );
         
             /**
              * @brief Add a message that you want to subscribe to
@@ -313,6 +359,9 @@ namespace Spacebrew {
         #else
         #endif
         
+            // binary-only event
+            ofEvent<BinaryMessage> onBinaryMessage;
+        
         protected:
             void update( ofEventArgs & e );
         
@@ -326,6 +375,9 @@ namespace Spacebrew {
             bool bAutoReconnect;
             int  lastTimeTriedConnect;
             int  reconnectInterval;
+        
+            // binary send/receive: this is 100% dependent on your server!
+            bool bSupportsBinary;
         
     #ifdef SPACEBREW_USE_OFX_LWS
             ofxLibwebsockets::Client client;

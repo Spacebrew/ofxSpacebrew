@@ -1,0 +1,3 @@
+ofxLibwebsockets
+ofxSpacebrew
+ofxTurboJpeg
