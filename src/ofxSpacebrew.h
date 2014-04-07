@@ -132,7 +132,17 @@ namespace Spacebrew {
         ofBuffer getSendBuffer( string configName ){
             outputBuffer.clear();
             string json = getJSON(configName);
-            outputBuffer.append( ofToString(json.length()) );
+            var jsonByteLength = json.length();
+            int numBytesForJsonLength = (jsonByteLength > 0xFFFF ? 5 : (jsonByteLength >= 254 ? 3 : 1));
+            if (numBytesForJsonLength == 5){
+                outputBuffer.append(255, 1);
+                outputBuffer.append([(char)(jsonByteLength >> 24), (char)(jsonByteLength >> 16), (char)(jsonByteLength >> 8), (char)(jsonByteLength)], 4);
+            } else if (numBytesForJsonLength == 3){
+                outputBuffer.append(254, 1);
+                outputBuffer.append([(char)(jsonByteLength >> 8), (char)(jsonByteLength)], 2);
+            } else {
+                outputBuffer.append((char)jsonByteLength, 1);
+            }
             outputBuffer.append( json );
             outputBuffer.append( buffer.getBinaryBuffer(), buffer.size() );
             return outputBuffer;
