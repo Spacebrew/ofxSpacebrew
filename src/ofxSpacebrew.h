@@ -110,47 +110,13 @@ namespace Spacebrew {
     class BinaryMessage : public Spacebrew::Message
     {
     public:
-        BinaryMessage( string _name, string _type, const ofBuffer buff ) : Message(_name, _type){
-            buffer.clear();
-            buffer.append(buff.getBinaryBuffer(), buff.size());
-        }
+        BinaryMessage( string _name, string _type, const ofBuffer buff );
+        BinaryMessage( string _name, string _type, const char * data, const long size );
         
-        BinaryMessage( string _name, string _type, const char * data, const long size ) : Message(_name, _type){
-            buffer.clear();
-            buffer.append(data, size);
-        }
+        string getJSON( string configName );
         
-        string getJSON( string configName ){
-            stringstream ss;
-            ss<<"{\"message\":{\"clientName\":\"";
-            ss<<configName<<"\",\"name\":\""<<name + "\",";
-            ss<<"\"type\":\"" + type + "\",";
-            ss<<"\"value\":"<<buffer.size()<<"}}";
-            return ss.str();
-        }
-        
-        ofBuffer getSendBuffer( string configName ){
-            outputBuffer.clear();
-            string json = getJSON(configName);
-            var jsonByteLength = json.length();
-            int numBytesForJsonLength = (jsonByteLength > 0xFFFF ? 5 : (jsonByteLength >= 254 ? 3 : 1));
-            if (numBytesForJsonLength == 5){
-                outputBuffer.append(255, 1);
-                outputBuffer.append([(char)(jsonByteLength >> 24), (char)(jsonByteLength >> 16), (char)(jsonByteLength >> 8), (char)(jsonByteLength)], 4);
-            } else if (numBytesForJsonLength == 3){
-                outputBuffer.append(254, 1);
-                outputBuffer.append([(char)(jsonByteLength >> 8), (char)(jsonByteLength)], 2);
-            } else {
-                outputBuffer.append((char)jsonByteLength, 1);
-            }
-            outputBuffer.append( json );
-            outputBuffer.append( buffer.getBinaryBuffer(), buffer.size() );
-            return outputBuffer;
-        }
-        
-        ofBuffer & data(){
-            return buffer;
-        }
+        ofBuffer getSendBuffer( string configName );
+        ofBuffer & data();
         
     protected:
         ofBuffer buffer, outputBuffer;

@@ -49,7 +49,7 @@ void ofApp::keyPressed(int key){
     if ( key == 's' ){
         if ( test.isAllocated() ){
             unsigned long size = 0;
-            unsigned char * data = jpeg.compress(&test, 90, &size);
+            unsigned char * data = jpeg.compress(test, 90, &size);
             
             buff.clear();
             buff.append(reinterpret_cast<char *>(data), size);

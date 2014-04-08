@@ -127,6 +127,62 @@ namespace Spacebrew {
         return (name == comp.name && type == comp.type);
     }
     
+#pragma mark BinaryMessage
+    
+    //--------------------------------------------------------------
+    BinaryMessage::BinaryMessage( string _name, string _type, const ofBuffer buff )
+    : Message(_name, _type){
+        buffer.clear();
+        buffer.append(buff.getBinaryBuffer(), buff.size());
+    }
+    
+    //--------------------------------------------------------------
+    BinaryMessage::BinaryMessage( string _name, string _type, const char * data, const long size )
+    : Message(_name, _type){
+        buffer.clear();
+        buffer.append(data, size);
+    }
+    
+    //--------------------------------------------------------------
+    string BinaryMessage::getJSON( string configName ){
+        stringstream ss;
+        ss<<"{\"message\":{\"clientName\":\"";
+        ss<<configName<<"\",\"name\":\""<<name + "\",";
+        ss<<"\"type\":\"" + type + "\",";
+        ss<<"\"value\":"<<buffer.size()<<"}}";
+        return ss.str();
+    }
+    
+    //--------------------------------------------------------------
+    ofBuffer BinaryMessage::getSendBuffer( string configName ){
+        outputBuffer.clear();
+        string json = getJSON(configName);
+        unsigned int jsonByteLength = json.length();
+        int numBytesForJsonLength = (jsonByteLength > 0xFFFF ? 5 : (jsonByteLength >= 254 ? 3 : 1));
+        if (numBytesForJsonLength == 5){
+            char c[] = {255};
+            outputBuffer.append(c, 1);
+            char len[] = {jsonByteLength >> 24, jsonByteLength >> 16, jsonByteLength >> 8, jsonByteLength};
+            outputBuffer.append(len, 4);
+        } else if (numBytesForJsonLength == 3){
+            char c[] = {254};
+            outputBuffer.append(c, 1);
+            char len[] = {jsonByteLength >> 8, jsonByteLength};
+            outputBuffer.append(len, 2);
+        } else {
+            char len[] = {jsonByteLength};
+            outputBuffer.append(len, 1);
+        }
+        outputBuffer.append( json );
+        outputBuffer.append( buffer.getBinaryBuffer(), buffer.size() );
+        return outputBuffer;
+    }
+    
+    //--------------------------------------------------------------
+    ofBuffer & BinaryMessage::data(){
+        return buffer;
+    }
+    
 #pragma mark Config
     
     //--------------------------------------------------------------
@@ -514,43 +570,78 @@ namespace Spacebrew {
                 if ( bConnected ) ofNotifyEvent(onMessageEvent, m, this);
             }
         } else {
+//            string temp(args.data.getBinaryBuffer());
+            
             // first, extract the message
-            string temp(args.data.getBinaryBuffer());
-            int mStart = temp.find("{");
-            if ( mStart >= 0 ){
-                int len = ofToInt(temp.substr(0,mStart));
-                string jsonStr = temp.substr(mStart,len);
+            if ( args.data.size() > 0 ){
+                unsigned long jsonLength = args.data.getBinaryBuffer()[0];
+                int jsonStartIndex = 1;
+                if (jsonLength == 254){
+                    if (args.data.size() > 3){
+                        jsonLength = args.data.getBinaryBuffer()[1];
+                        jsonStartIndex = 3;
+                    } else {
+                        ofLogError()<<"[ofxSpacebrew::Connection] Binary message of incorrect format";
+                        return;
+                    }
+                } else if (jsonLength == 255){
+                    if (args.data.size() > 5){
+                        jsonLength = args.data.getBinaryBuffer()[1];
+                        jsonStartIndex = 5;
+                    } else {
+                        ofLogError()<<"[ofxSpacebrew::Connection] Binary message of incorrect format";
+                        return;
+                    }
+                }
                 
-                static Json::Reader jsonReader;
-                Json::Value json;
-                jsonReader.parse(jsonStr, json);
-                
-                string name = json["message"]["name"].asString();
-                string type = json["message"]["type"].asString();
-                
-                // value == size of binary data
-                stringstream s; s<<json["message"]["value"];
-                string value = s.str();
-                
-                // find message in config and update if necessary
-//                vector<Message> sub = config.getSubscribe();
-//                for ( int i=0; i<sub.size(); i++){
-//                    if ( sub[i] == m ){
-//                        sub[i].update( m.value );
+                if (jsonLength > 0 ){
+                    string jsonStr = args.data.getText().substr(jsonStartIndex, jsonLength);
+                    
+                    static Json::Reader jsonReader;
+                    Json::Value json;
+                    jsonReader.parse(jsonStr, json);
+                    
+                    string name = json["message"]["name"].asString();
+                    string type = json["message"]["type"].asString();
+                    
+                    // value == size of binary data
+                    stringstream s; s<<json["message"]["value"];
+                    string value = s.str();
+                    
+                    // find message in config and update if necessary
+                    //                vector<Message> sub = config.getSubscribe();
+                    //                for ( int i=0; i<sub.size(); i++){
+                    //                    if ( sub[i] == m ){
+                    //                        sub[i].update( m.value );
+                    //                    }
+                    //                }
+                    
+                    int size = ofToInt(value);
+                    char * data = (char*) calloc(size, sizeof(char) );
+                    memcpy(data, args.data.getBinaryBuffer() + jsonStartIndex + jsonLength, size);
+                    
+                    BinaryMessage m(name, type, data, size);
+                    
+                    ofLogVerbose() << "[ofxSpacebrew::Connection] got binary of size "<<size;;
+                    
+                    if ( bConnected ) ofNotifyEvent(onBinaryMessage, m, this);
+                } else {
+                    ofLogError() << "[ofxSpacebrew::Connection] got bad binary frame (no json)";
+                }
+                    
+//                    if (args.data.size() >= jsonStartIndex + jsonLength) {
+//                        try {
+//                            var json  = JSON.parse( message.slice(jsonStartIndex, jsonStartIndex + jsonLength ).toString());
+//                        } catch ( err ){
+//                            logger.log("error", "[wss.onmessage] Error parsing JSON from binary packet. Discarding");
+//                            return;
+//                        }
+//                        
+//                        bValidMessage = handleBinaryMessage(connection, json, message.slice(jsonStartIndex + jsonLength) );
+//                    } else {
+//                        logger.log("error", "[wss.onmessage] message of incorrect format");
+//                        return;
 //                    }
-//                }
-                
-                int size = ofToInt(value);
-                char * data = (char*) calloc(size, sizeof(char) );
-                memcpy(data, args.data.getBinaryBuffer() + len, size);
-                
-                BinaryMessage m(name, type, data, size);
-                
-                ofLogVerbose() << "[ofxSpacebrew::Connection] got binary of size "<<size;;
-                
-                if ( bConnected ) ofNotifyEvent(onBinaryMessage, m, this);
-            } else {
-                cout <<"WTF"<<endl;
             }
         }
     }
