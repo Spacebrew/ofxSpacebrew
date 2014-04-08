@@ -189,7 +189,10 @@ namespace Spacebrew {
     void Config::addSubscribe( string name, string type ){
         subscribe.push_back( Message(name, type) );
     }
-    
+    //--------------------------------------------------------------
+    void Config::addSubscribe( string name, string type, string * value ){
+        subscribe.push_back( Message(name, type, value ) );
+    }
     //--------------------------------------------------------------
     void Config::addSubscribe( Message m ){
         subscribe.push_back(m);
