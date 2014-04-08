@@ -614,7 +614,14 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_50)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_51)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_52)",
-					"/Users/brettrenfer/Dropbox/Code/OF/of_v0.8.1_osx_release/addons/ofxTurboJpeg/libs/turbo-jpeg/lib/osx",
+					"../../../addons/ofxTurboJpeg/libs/turbo-jpeg/lib/osx",
+				);
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					../../../addons/ofxLibwebsockets/libs/libwebsockets/lib/osx/libwebsockets.a,
+					../../../addons/ofxLibwebsockets/libs/openssl/lib/osx/libcrypto.a,
+					../../../addons/ofxLibwebsockets/libs/openssl/lib/osx/libssl.a,
+					"../../../addons/ofxTurboJpeg/libs/turbo-jpeg/lib/osx/libturbojpeg.dylib",
 				);
 				PRODUCT_NAME = example_binaryDebug;
 				WRAPPER_EXTENSION = app;
@@ -700,7 +707,14 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_49)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_50)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_51)",
-					"/Users/brettrenfer/Dropbox/Code/OF/of_v0.8.1_osx_release/addons/ofxTurboJpeg/libs/turbo-jpeg/lib/osx",
+					"../../../addons/ofxTurboJpeg/libs/turbo-jpeg/lib/osx",
+				);
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					../../../addons/ofxLibwebsockets/libs/libwebsockets/lib/osx/libwebsockets.a,
+					../../../addons/ofxLibwebsockets/libs/openssl/lib/osx/libcrypto.a,
+					../../../addons/ofxLibwebsockets/libs/openssl/lib/osx/libssl.a,
+					"../../../addons/ofxTurboJpeg/libs/turbo-jpeg/lib/osx/libturbojpeg.dylib",
 				);
 				PRODUCT_NAME = example_binary;
 				WRAPPER_EXTENSION = app;
