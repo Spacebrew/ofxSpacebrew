@@ -3,6 +3,8 @@
 ofBuffer buff, inBuff;
 ofImage test, test2;
 bool bLoad = false;
+int sendInterval = 500;
+int lastSent = 0;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -23,8 +25,8 @@ void ofApp::update(){
     }
     // outgoing
     grabber.update();
-    if ( grabber.isFrameNew() ){
-        
+    if ( grabber.isFrameNew() && ofGetElapsedTimeMillis() - lastSent > sendInterval ){
+        lastSent = ofGetElapsedTimeMillis();
         unsigned long size = 0;
         unsigned char * data = jpeg.compress(grabber, 50, &size);
         
