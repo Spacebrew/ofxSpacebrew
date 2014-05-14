@@ -182,6 +182,17 @@ namespace Spacebrew {
              * @param {std::string} description What does your app do?
              */
             void connect( string host = SPACEBREW_CLOUD, string name = "openFrameworks app", string description = "");
+        
+            /**
+             * @brief Connect to Spacebrew. Pass empty values to connect to default host as "openFrameworks" app
+             * (use only for testing!)
+             * @param {std::string} host        Host to connect to (e.g. "localhost", SPACEBREW_CLOUD ). Can be IP address OR hostname
+             * @param {int}         port        Port of spacebrew server; only use this method if you've set up your server with a custom port!
+             * @param {std::string} name        Name of your app (shows up in Spacebrew admin)
+             * @param {std::string} description What does your app do?
+             */
+            void connect( string host, int port, string name = "openFrameworks app", string description = "");
+            void connect( string host, int port, Config _config );
             void connect( string host, Config _config );
             
             /**
@@ -342,6 +353,7 @@ namespace Spacebrew {
             void update( ofEventArgs & e );
         
             string host;
+            int    port;
             bool bConnected;
             void updatePubSub();
         

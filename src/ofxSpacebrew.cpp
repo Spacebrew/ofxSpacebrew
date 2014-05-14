@@ -305,7 +305,7 @@ namespace Spacebrew {
         if ( bAutoReconnect ){
             if ( !bConnected && ofGetElapsedTimeMillis() - lastTimeTriedConnect > reconnectInterval ){
                 lastTimeTriedConnect = ofGetElapsedTimeMillis();
-                connect( host, config );
+                connect( host, port, config );
             }
         }
     }
@@ -313,20 +313,43 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::connect( string _host, string name, string description){
         host = _host;
+        port = SPACEBREW_PORT;
         config.clientName = name;
         config.description = description;
 
     #ifdef SPACEBREW_USE_OFX_LWS
-        client.connect( host, SPACEBREW_PORT );
+        client.connect( host, port );
     #endif
+    }
+    
+    //--------------------------------------------------------------
+    void Connection::connect( string _host, int _port, string name, string description){
+        host = _host;
+        port = _port;
+        config.clientName = name;
+        config.description = description;
+        
+#ifdef SPACEBREW_USE_OFX_LWS
+        client.connect( host, port );
+#endif
     }
     
     //--------------------------------------------------------------
     void Connection::connect( string host, Config _config ){
         config = _config;
+        port = SPACEBREW_PORT;
     #ifdef SPACEBREW_USE_OFX_LWS
-        client.connect( host, SPACEBREW_PORT );
+        client.connect( host, port );
     #endif
+    }
+    
+    //--------------------------------------------------------------
+    void Connection::connect( string host, int _port, Config _config ){
+        config = _config;
+        port = _port;
+#ifdef SPACEBREW_USE_OFX_LWS
+        client.connect( host, port );
+#endif
     }
     
     //--------------------------------------------------------------
@@ -1000,7 +1023,6 @@ namespace Spacebrew {
             }
             
             if ( bNew ){
-                cout << "New?" << endl;
                 // doesn't exist yet, add as new
                 connectedClients.push_back( c );
                 ofNotifyEvent(onClientConnectEvent, c, this);
