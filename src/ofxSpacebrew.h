@@ -292,8 +292,8 @@ namespace Spacebrew {
 
             /**
              * @brief ofEvent to subscribe to!
-             * @example ofAddListener(spacebrew.onMessageEvent, this, &testApp::onMessage);
-             * void testApp::onMessage( Spacebrew::Message & m ){ 
+             * @example ofAddListener(spacebrew.onMessageEvent, this, &ofApp::onMessage);
+             * void ofApp::onMessage( Spacebrew::Message & m ){ 
              *     cout<< m.value << endl; 
              * };
              */
