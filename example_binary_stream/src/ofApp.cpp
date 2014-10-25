@@ -9,7 +9,7 @@ int lastSent = 0;
 //--------------------------------------------------------------
 void ofApp::setup(){
     spacebrew.addPublish("videoStream", "image");
-    spacebrew.connect( "localhost", "videoStreamer" );
+    spacebrew.connect( "127.0.0.1", "videoStreamer" );
     
     grabber.initGrabber(320, 240);
     
