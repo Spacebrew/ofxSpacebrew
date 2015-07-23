@@ -133,7 +133,7 @@ namespace Spacebrew {
     BinaryMessage::BinaryMessage( string _name, string _type, const ofBuffer buff )
     : Message(_name, _type){
         buffer.clear();
-        buffer.append(buff.getBinaryBuffer(), buff.size());
+        buffer.append(buff.getData(), buff.size());
     }
     
     //--------------------------------------------------------------
@@ -160,21 +160,21 @@ namespace Spacebrew {
         unsigned int jsonByteLength = json.length();
         int numBytesForJsonLength = (jsonByteLength > 0xFFFF ? 5 : (jsonByteLength >= 254 ? 3 : 1));
         if (numBytesForJsonLength == 5){
-            char c[] = {255};
+            char c[] = {static_cast<char>(255)};
             outputBuffer.append(c, 1);
-            char len[] = {jsonByteLength >> 24, jsonByteLength >> 16, jsonByteLength >> 8, jsonByteLength};
+            char len[] = {static_cast<char>(jsonByteLength >> 24), static_cast<char>(jsonByteLength >> 16), static_cast<char>(jsonByteLength >> 8), static_cast<char>(jsonByteLength)};
             outputBuffer.append(len, 4);
         } else if (numBytesForJsonLength == 3){
-            char c[] = {254};
+            char c[] = {static_cast<char>(254)};
             outputBuffer.append(c, 1);
-            char len[] = {jsonByteLength >> 8, jsonByteLength};
+            char len[] = {static_cast<char>(jsonByteLength >> 8), static_cast<char>(jsonByteLength)};
             outputBuffer.append(len, 2);
         } else {
-            char len[] = {jsonByteLength};
+            char len[] = {static_cast<char>(jsonByteLength)};
             outputBuffer.append(len, 1);
         }
         outputBuffer.append( json );
-        outputBuffer.append( buffer.getBinaryBuffer(), buffer.size() );
+        outputBuffer.append( buffer.getData(), buffer.size() );
         return outputBuffer;
     }
     
@@ -600,11 +600,11 @@ namespace Spacebrew {
             
             // first, extract the message
             if ( args.data.size() > 0 ){
-                unsigned long jsonLength = args.data.getBinaryBuffer()[0];
+                unsigned long jsonLength = args.data.getData()[0];
                 int jsonStartIndex = 1;
                 if (jsonLength == 254){
                     if (args.data.size() > 3){
-                        jsonLength = args.data.getBinaryBuffer()[1];
+                        jsonLength = args.data.getData()[1];
                         jsonStartIndex = 3;
                     } else {
                         ofLogError()<<"[ofxSpacebrew::Connection] Binary message of incorrect format";
@@ -612,7 +612,7 @@ namespace Spacebrew {
                     }
                 } else if (jsonLength == 255){
                     if (args.data.size() > 5){
-                        jsonLength = args.data.getBinaryBuffer()[1];
+                        jsonLength = args.data.getData()[1];
                         jsonStartIndex = 5;
                     } else {
                         ofLogError()<<"[ofxSpacebrew::Connection] Binary message of incorrect format";
