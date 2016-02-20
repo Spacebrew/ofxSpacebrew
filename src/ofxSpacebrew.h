@@ -361,8 +361,8 @@ namespace Spacebrew {
             
             // reconnect
             bool bAutoReconnect;
-            int  lastTimeTriedConnect;
-            int  reconnectInterval;
+            uint64_t  lastTimeTriedConnect;
+            uint64_t  reconnectInterval;
         
             // binary send/receive: this is 100% dependent on your server!
             bool bSupportsBinary;
