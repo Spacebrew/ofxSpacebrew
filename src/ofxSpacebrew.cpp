@@ -739,19 +739,19 @@ namespace Spacebrew {
 
     //--------------------------------------------------------------
     void AdminConnection::onMessage( ofxLibwebsockets::Event& args ){
-        if ( !args.json.isNull() ){
+        if ( !args.json.is_null() ){
             
             // start configs come in as array
-            if ( args.json.isArray() ){
+            if ( args.json.is_array() ){
                 for (int k=0; k<args.json.size(); k++){
                     
-                    Json::Value config = args.json[k];
+                    auto config = args.json[k];
                     
                     processIncomingJson( config );
                 }
             // normal ws event
-            } else if ( !args.json["message"].isNull()
-                       && (args.json["message"]["targetType"].isNull() || args.json["message"]["targetType"] == "client")){
+            } else if ( !args.json["message"].is_null()
+                       && (args.json["message"]["targetType"].is_null() || args.json["message"]["targetType"] == "client")){
                 Connection::onMessage(args);
             
             // admin event
@@ -948,10 +948,10 @@ namespace Spacebrew {
     
     //--------------------------------------------------------------
     void AdminConnection::updateRoute( RouteUpdateType type, Route route ){
-        Json::Value message;
-        message["route"] = Json::Value( Json::objectValue );
-        message["route"]["publisher"]   = Json::Value( Json::objectValue );
-        message["route"]["subscriber"]  = Json::Value( Json::objectValue );
+        ofJson message;
+        message["route"] = ofJson::object();
+        message["route"]["publisher"]   = ofJson::object();
+        message["route"]["subscriber"]  = ofJson::object();
         
         // the JS library checks to see if stuff exists before sending...
         // not doing that for now.
@@ -962,7 +962,7 @@ namespace Spacebrew {
                 break;
         }
         
-        message["route"]["type"] = Json::Value(getRouteUpdateTypeString(type));
+        message["route"]["type"] = ofJson(getRouteUpdateTypeString(type));
         
         // append pub + sub
         message["route"]["publisher"]["name"]           = route.getPublisher().name;
@@ -978,7 +978,7 @@ namespace Spacebrew {
         // send to server
         if ( bConnected ){
         #ifdef SPACEBREW_USE_OFX_LWS
-            client.send( message.toStyledString() );
+            client.send( message.dump() );
         #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
@@ -986,20 +986,20 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
-    void AdminConnection::processIncomingJson( Json::Value & config ){
+    void AdminConnection::processIncomingJson( ofJson & config ){
         // new connection
-        if ( !config["config"].isNull() ){
+        if ( !config["config"].is_null() ){
             Config c;
             c.clientName    = config["config"]["name"];
             c.description   = config["config"]["description"];
             c.remoteAddress = config["config"]["remoteAddress"];
             
-            Json::Value publishes = config["config"]["publish"]["messages"];
+            auto publishes = config["config"]["publish"]["messages"];
             for ( int i=0; i<publishes.size(); i++){
                 c.addPublish(publishes[i]["name"], publishes[i]["type"], publishes[i]["default"]);
             }
             
-            Json::Value subscribes = config["config"]["subscribe"]["messages"];
+            auto subscribes = config["config"]["subscribe"]["messages"];
             for ( int i=0; i<subscribes.size(); i++){
                 c.addSubscribe(subscribes[i]["name"], subscribes[i]["type"]);
             }
@@ -1030,11 +1030,11 @@ namespace Spacebrew {
             }
             
             // connection removed
-        } else if ( !config["remove"].isNull()){
+        } else if ( !config["remove"].is_null()){
             
             for (int i=0; i < config["remove"].size(); i++){
                 
-                Json::Value toRemove = config["remove"][i];
+                ofJson toRemove = config["remove"][i];
                 string name          = toRemove["name"];
                 string remoteAddress = toRemove["remoteAddress"];
                 
@@ -1049,7 +1049,7 @@ namespace Spacebrew {
                 }
             }
             // route
-        } else if ( !config["route"].isNull()){
+        } else if ( !config["route"].is_null()){
             
             RouteEndpoint pub;
             pub.name            = config["route"]["publisher"]["name"];
@@ -1079,10 +1079,10 @@ namespace Spacebrew {
             }
             
         // data
-        } else if ( !config["message"].isNull()){
+        } else if ( !config["message"].is_null()){
             
             // message from admin
-            if ( !config["message"]["clientName"].isNull()){
+            if ( !config["message"]["clientName"].is_null()){
                 DataMessage m;
                 m.clientName    = config["message"]["clientName"];
                 m.remoteAddress = config["message"]["remoteAddress"];
