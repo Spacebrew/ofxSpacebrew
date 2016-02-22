@@ -560,25 +560,25 @@ namespace Spacebrew {
     //--------------------------------------------------------------
     void Connection::onMessage( ofxLibwebsockets::Event& args ){
         if ( !args.isBinary ){
-            if ( !args.json.isNull() ){
+            if ( !args.json.is_null() ){
                 Message m;
-                m.name = args.json["message"]["name"].asString();
-                m.type = args.json["message"]["type"].asString();
+                m.name = args.json["message"]["name"];
+                m.type = args.json["message"]["type"];
                 
-                string type = args.json["message"]["type"].asString();
-                if ( type == "string" && args.json["message"]["value"].isString()){
-                    m.value = args.json["message"]["value"].asString();
+                string type = args.json["message"]["type"];
+                if ( type == "string" && args.json["message"]["value"].is_string()){
+                    m.value = args.json["message"]["value"];
                 } else if ( type == "boolean" ){
-                    if ( args.json["message"]["value"].isInt() ){
-                        m.value = ofToString( args.json["message"]["value"].asInt());
-                    } else if ( args.json["message"]["value"].isString() ){
-                        m.value = args.json["message"]["value"].asString();
+                    if ( args.json["message"]["value"].is_number() ){
+                        m.value = ofToString( args.json["message"]["value"]);
+                    } else if ( args.json["message"]["value"].is_string() ){
+                        m.value = args.json["message"]["value"];
                     }
                 } else if ( type == "number" || type == "range" ){
-                    if ( args.json["message"]["value"].isInt() ){
-                        m.value = ofToString( args.json["message"]["value"].asInt());
-                    } else if ( args.json["message"]["value"].isString() ){
-                        m.value = args.json["message"]["value"].asString();
+                    if ( args.json["message"]["value"].is_number() ){
+                        m.value = ofToString( args.json["message"]["value"]);
+                    } else if ( args.json["message"]["value"].is_string() ){
+                        m.value = args.json["message"]["value"];
                     }
                 } else {
                     stringstream s; s<<args.json["message"]["value"];
@@ -623,34 +623,35 @@ namespace Spacebrew {
                 if (jsonLength > 0 ){
                     string jsonStr = args.data.getText().substr(jsonStartIndex, jsonLength);
                     
-                    static Json::Reader jsonReader;
-                    Json::Value json;
-                    jsonReader.parse(jsonStr, json);
-                    
-                    string name = json["message"]["name"].asString();
-                    string type = json["message"]["type"].asString();
-                    
-                    // value == size of binary data
-                    stringstream s; s<<json["message"]["value"];
-                    string value = s.str();
-                    
-                    // find message in config and update if necessary
-                    //                vector<Message> sub = config.getSubscribe();
-                    //                for ( int i=0; i<sub.size(); i++){
-                    //                    if ( sub[i] == m ){
-                    //                        sub[i].update( m.value );
-                    //                    }
-                    //                }
-                    
-                    int size = ofToInt(value);
-                    char * data = (char*) calloc(size, sizeof(char) );
-                    memcpy(data, args.data.getBinaryBuffer() + jsonStartIndex + jsonLength, size);
-                    
-                    BinaryMessage m(name, type, data, size);
-                    
-                    ofLogVerbose() << "[ofxSpacebrew::Connection] got binary of size "<<size;;
-                    
-                    if ( bConnected ) ofNotifyEvent(onBinaryMessage, m, this);
+                    try {
+                        auto json = ofJson::parse(jsonStr);
+                        string name = json["message"]["name"];
+                        string type = json["message"]["type"];
+                        
+                        // value == size of binary data
+                        stringstream s; s<<json["message"]["value"];
+                        string value = s.str();
+                        
+                        // find message in config and update if necessary
+                        //                vector<Message> sub = config.getSubscribe();
+                        //                for ( int i=0; i<sub.size(); i++){
+                        //                    if ( sub[i] == m ){
+                        //                        sub[i].update( m.value );
+                        //                    }
+                        //                }
+                        
+                        int size = ofToInt(value);
+                        char * data = (char*) calloc(size, sizeof(char) );
+                        memcpy(data, args.data.getData() + jsonStartIndex + jsonLength, size);
+                        
+                        BinaryMessage m(name, type, data, size);
+                        
+                        ofLogVerbose() << "[ofxSpacebrew::Connection] got binary of size "<<size;;
+                        
+                        if ( bConnected ) ofNotifyEvent(onBinaryMessage, m, this);
+                    } catch(...){
+                        ofLogError() <<"[ofxSpacebrew::Connection] error parsing binary JSON";
+                    }
                 } else {
                     ofLogError() << "[ofxSpacebrew::Connection] got bad binary frame (no json)";
                 }
@@ -750,7 +751,7 @@ namespace Spacebrew {
                 }
             // normal ws event
             } else if ( !args.json["message"].isNull()
-                       && (args.json["message"]["targetType"].isNull() || args.json["message"]["targetType"].asString() == "client")){
+                       && (args.json["message"]["targetType"].isNull() || args.json["message"]["targetType"] == "client")){
                 Connection::onMessage(args);
             
             // admin event
@@ -989,18 +990,18 @@ namespace Spacebrew {
         // new connection
         if ( !config["config"].isNull() ){
             Config c;
-            c.clientName    = config["config"]["name"].asString();
-            c.description   = config["config"]["description"].asString();
-            c.remoteAddress = config["config"]["remoteAddress"].asString();
+            c.clientName    = config["config"]["name"];
+            c.description   = config["config"]["description"];
+            c.remoteAddress = config["config"]["remoteAddress"];
             
             Json::Value publishes = config["config"]["publish"]["messages"];
             for ( int i=0; i<publishes.size(); i++){
-                c.addPublish(publishes[i]["name"].asString(), publishes[i]["type"].asString(), publishes[i]["default"].asString());
+                c.addPublish(publishes[i]["name"], publishes[i]["type"], publishes[i]["default"]);
             }
             
             Json::Value subscribes = config["config"]["subscribe"]["messages"];
             for ( int i=0; i<subscribes.size(); i++){
-                c.addSubscribe(subscribes[i]["name"].asString(), subscribes[i]["type"].asString());
+                c.addSubscribe(subscribes[i]["name"], subscribes[i]["type"]);
             }
             
             bool bNew = true;
@@ -1034,8 +1035,8 @@ namespace Spacebrew {
             for (int i=0; i < config["remove"].size(); i++){
                 
                 Json::Value toRemove = config["remove"][i];
-                string name          = toRemove["name"].asString();
-                string remoteAddress = toRemove["remoteAddress"].asString();
+                string name          = toRemove["name"];
+                string remoteAddress = toRemove["remoteAddress"];
                 
                 for (int j=0; j<connectedClients.size(); j++){
                     if ( connectedClients[j].clientName == name &&
@@ -1051,23 +1052,23 @@ namespace Spacebrew {
         } else if ( !config["route"].isNull()){
             
             RouteEndpoint pub;
-            pub.name            = config["route"]["publisher"]["name"].asString();
-            pub.type            = config["route"]["publisher"]["type"].asString();
-            pub.clientName      = config["route"]["publisher"]["clientName"].asString();
-            pub.remoteAddress   = config["route"]["publisher"]["remoteAddress"].asString();
+            pub.name            = config["route"]["publisher"]["name"];
+            pub.type            = config["route"]["publisher"]["type"];
+            pub.clientName      = config["route"]["publisher"]["clientName"];
+            pub.remoteAddress   = config["route"]["publisher"]["remoteAddress"];
             
             RouteEndpoint sub;
-            sub.name            = config["route"]["subscriber"]["name"].asString();
-            sub.type            = config["route"]["subscriber"]["type"].asString();
-            sub.clientName      = config["route"]["subscriber"]["clientName"].asString();
-            sub.remoteAddress   = config["route"]["subscriber"]["remoteAddress"].asString();
+            sub.name            = config["route"]["subscriber"]["name"];
+            sub.type            = config["route"]["subscriber"]["type"];
+            sub.clientName      = config["route"]["subscriber"]["clientName"];
+            sub.remoteAddress   = config["route"]["subscriber"]["remoteAddress"];
             
             Route r( pub, sub );
             
-            if ( config["route"]["type"].asString() == "add" ){
+            if ( config["route"]["type"] == "add" ){
                 currentRoutes.push_back(r);
                 ofNotifyEvent(onRouteAdded, r, this);
-            } else if ( config["route"]["type"].asString() == "remove"){
+            } else if ( config["route"]["type"] == "remove"){
                 for (int i=0; i<currentRoutes.size(); i++){
                     if ( currentRoutes[i] == r ){
                         ofNotifyEvent(onRouteRemoved, r, this);
@@ -1083,11 +1084,11 @@ namespace Spacebrew {
             // message from admin
             if ( !config["message"]["clientName"].isNull()){
                 DataMessage m;
-                m.clientName    = config["message"]["clientName"].asString();
-                m.remoteAddress = config["message"]["remoteAddress"].asString();
-                m.name          = config["message"]["name"].asString();
-                m.type          = config["message"]["type"].asString();
-                m.value         = config["message"]["value"].asString();
+                m.clientName    = config["message"]["clientName"];
+                m.remoteAddress = config["message"]["remoteAddress"];
+                m.name          = config["message"]["name"];
+                m.type          = config["message"]["type"];
+                m.value         = config["message"]["value"];
             }
         }
     }

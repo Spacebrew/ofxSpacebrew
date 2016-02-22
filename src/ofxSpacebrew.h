@@ -563,7 +563,7 @@ namespace Spacebrew {
          */
         void updateRoute( RouteUpdateType type, Route route );
         
-        void processIncomingJson( Json::Value & val );
+        void processIncomingJson( ofJson & val );
     };
         
     /**
