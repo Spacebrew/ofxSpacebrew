@@ -299,10 +299,17 @@ namespace Spacebrew {
              */
             ofEvent<Message> onMessageEvent;
 
+            /*
+             * @brief ofEvent to listen to.
+             *  Only passes a string with the name
+             *  of the publisher that is sending
+             */
+            ofEvent<string> onSendEvent;
+
             /**
              * @return Current Spacebrew::Config (list of publish/subscribe, etc)
              */
-            Config * getConfig();
+            Config * getConfig(); 
         
             /**
              * @return Are we connected?
