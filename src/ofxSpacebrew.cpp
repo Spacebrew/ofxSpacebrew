@@ -398,6 +398,7 @@ namespace Spacebrew {
 		if ( bConnected ){
         #ifdef SPACEBREW_USE_OFX_LWS
             client.send( m.getJSON( config.clientName ) );
+            ofNotifyEvent(onSendEvent, m.name, this);
         #endif
         } else {
             ofLog( OF_LOG_WARNING, "Send failed, not connected!");
