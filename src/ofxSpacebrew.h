@@ -115,7 +115,7 @@ namespace Spacebrew {
         
         string getJSON( string configName );
         
-        ofBuffer getSendBuffer( string configName );
+        ofBuffer & getSendBuffer( string configName );
         ofBuffer & data();
         
     protected:

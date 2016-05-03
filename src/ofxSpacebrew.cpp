@@ -154,7 +154,7 @@ namespace Spacebrew {
     }
     
     //--------------------------------------------------------------
-    ofBuffer BinaryMessage::getSendBuffer( string configName ){
+    ofBuffer & BinaryMessage::getSendBuffer( string configName ){
         outputBuffer.clear();
         string json = getJSON(configName);
         unsigned int jsonByteLength = json.length();
